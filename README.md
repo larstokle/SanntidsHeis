@@ -16,8 +16,8 @@
 	- si ifra om ingen mulighet for å behandle order...
 
 ##Heisoppførsel (Cost function):
-	 - behandle interne først etter retning
-	- ta eksterne på veien
+ - behandle interne først etter retning
+ - ta eksterne på veien
 	- eksterne FIFO, nærmeste ledig tar den.
 		- Ingen ledig: Heis spør etter nye ordre når den blir ledig.
 
