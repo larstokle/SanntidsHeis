@@ -1,12 +1,12 @@
 # SanntidsHeis
 
 ##Avoid losing orders:
--Lokal backupprogram på alle maskiner kjørende
+- Lokal backupprogram på alle maskiner kjørende
 	- kommuniserer ved fil i tilfelle restart ol.
 	- fjerner/skriver til fil om forrige sesjon avsluttet riktig
--remote programstartup når PC "våkner" igjen?
--Network check: kjøre selv om nettverk er borte
--Timestamp for sync.
+- remote programstartup når PC "våkner" igjen?
+- Network check: kjøre selv om nettverk er borte
+- Timestamp for sync.
 
 ##HW feil:
 - feil kjøretid mellom etasjer.
