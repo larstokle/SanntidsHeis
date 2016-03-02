@@ -8,21 +8,31 @@
 - Sender knappetrykk og venter på "vote" for sync av kø.
 
 ##Moduler/funksjonaliteter
-- [ ] HW
-	- [ ] Kjør motor
-	- [ ] Sett bestillingslys
-	- [ ] sett etasjelys
-	- [ ] etasjesensor
-	- [ ] knappetrykk
-- [ ] LocalEventmanager
-	- [ ] knappetrykk behandling
-	- [ ] feilevents
-- [ ] Que
-	- [ ] new order
-	- [ ] neste ordre
-	- [ ] fjern ordre
-	- [ ] syncronize
-- [ ] FSM
+- [ ] main
+	- [ ] quit
+	- [ ] start backup
+	- [ ] init
+	- [ ] swtich to local master
+	- [ ] start elevator manager and network manager
+- [?] ElevatorManager
+	- [ ] HW
+		- [ ] Kjør motor
+		- [ ] Sett bestillingslys
+		- [ ] sett etasjelys
+		- [ ] etasjesensor
+		- [ ] knappetrykk
+	- [ ] Cost 
+	- [ ] LocalEventmanager
+		- [ ] knappetrykk behandling
+		- [ ] feilevents
+	- [ ] Que
+		- [ ] new order
+		- [ ] neste ordre
+		- [ ] fjern ordre
+		- [ ] syncronize
+	- [ ] FSM
+		- [ ] new event
+		- [ ] get state
 - [ ] Log Manager
 	- [ ] write order
 	- [ ] read order
@@ -39,7 +49,7 @@
 	- [ ] send
 	- [ ] recieve
 	- [ ] error check
-- [ ] Cost (kanskje en annen plass: elevator_ manager?)
+
 
 ##Avoid losing orders:
 - Lokal backupprogram på alle maskiner kjørende
