@@ -14,13 +14,13 @@
 	- [ ] init
 	- [ ] swtich to local master
 	- [ ] start elevator manager and network manager
-- [?] ElevatorManager
-	- [ ] HW
-		- [ ] Kjør motor
-		- [ ] Sett bestillingslys
-		- [ ] sett etasjelys
-		- [ ] etasjesensor
-		- [ ] knappetrykk
+- [ ] ElevatorManager
+	- [x] HW
+		- [x] Kjør motor
+		- [x] Sett bestillingslys
+		- [x] sett etasjelys
+		- [x] etasjesensor
+		- [x] knappetrykk
 	- [ ] Cost 
 	- [ ] LocalEventmanager
 		- [ ] knappetrykk behandling
@@ -60,7 +60,7 @@
 - Timestamp for sync.
 
 ##Heisoppførsel (Cost function):
-- behandle interne først etter retning (mulig vi må ta høyde for kukunger..?)
+- behandle interne først etter retning (mulig vi må ta høyde for kukunger..? cost for å skifte retning?)
 - ta eksterne på veien
 - eksterne FIFO, nærmeste ledig tar den.
 	- Ingen ledig: Heis spør etter nye ordre når den blir ledig.
