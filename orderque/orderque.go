@@ -17,17 +17,21 @@ type Order_t struct {
 	orderType int
 }
 
-func (que OrderQue_t) AddOrder(floor int, orderType int) {
-	que[floor][orderType].hasOrder = true
-	que[floor][orderType].lastChangeTime = time.Now()
+func (que *OrderQue_t) AddOrder(floor int, orderType int) {
+	if !que.HasOrder(floor, orderType) {
+		que[floor][orderType].hasOrder = true
+		que[floor][orderType].lastChangeTime = time.Now()
+	}
 }
 
-func (que OrderQue_t) CompleteOrder(floor int, orderType int) {
-	que[floor][orderType].hasOrder = false
-	que[floor][orderType].lastChangeTime = time.Now()
+func (que *OrderQue_t) CompleteOrder(floor int, orderType int) {
+	if que.HasOrder(floor, orderType) {
+		que[floor][orderType].hasOrder = false
+		que[floor][orderType].lastChangeTime = time.Now()
+	}
 }
 
-func (thisQue OrderQue_t) Sync(queToSync OrderQue_t) OrderQue_t { //add error returns?
+func (thisQue *OrderQue_t) Sync(queToSync OrderQue_t) OrderQue_t { //add error returns?
 	for floor := 0; floor < driver.N_FLOORS; floor++ {
 		for orderType := 0; orderType < driver.N_BUTTONS; orderType++ {
 			if queToSync[floor][orderType].lastChangeTime.After(thisQue[floor][orderType].lastChangeTime) {
@@ -35,23 +39,14 @@ func (thisQue OrderQue_t) Sync(queToSync OrderQue_t) OrderQue_t { //add error re
 			}
 		}
 	}
-	return thisQue
+	return *thisQue
 }
 
-func (que OrderQue_t) HasOrderInDir(floor int, dir int) bool {
-	switch dir {
-	case driver.DIR_DOWN:
-		return que[floor][driver.BTN_DOWN].hasOrder || que[floor][driver.BTN_CMD].hasOrder
-	case driver.DIR_UP:
-		return que[floor][driver.BTN_UP].hasOrder || que[floor][driver.BTN_CMD].hasOrder
-	case driver.DIR_STOP:
-		return que[floor][driver.BTN_CMD].hasOrder
-	default:
-		return false
-	}
+func (que *OrderQue_t) HasOrder(floor int, orderType int) bool {
+	return que[floor][orderType].hasOrder
 }
 
-func (que OrderQue_t) IsEmpty() bool {
+func (que *OrderQue_t) IsEmpty() bool {
 	for floor := 0; floor < driver.N_FLOORS; floor++ {
 		for orderType := 0; orderType < driver.N_BUTTONS; orderType++ {
 			if que[floor][orderType].hasOrder {
@@ -62,7 +57,7 @@ func (que OrderQue_t) IsEmpty() bool {
 	return false
 }
 
-func (que OrderQue_t) EarliestOrderInside() Order_t {
+func (que *OrderQue_t) EarliestOrderInside() Order_t {
 	if que.IsEmpty() {
 		return Order_t{-1, -1}
 	}
@@ -78,12 +73,13 @@ func (que OrderQue_t) EarliestOrderInside() Order_t {
 	return earliestOrder
 }
 
-func (que OrderQue_t) Print() {
+func (que *OrderQue_t) Print() {
 	fmt.Println("OrderQue_t:")
 	for orderType := 0; orderType < driver.N_BUTTONS; orderType++ {
 		fmt.Printf("\tordertype: %d\n", orderType)
 		for floor := 0; floor < driver.N_FLOORS; floor++ {
-			fmt.Printf("\t\tFloor %d: has order = %t,last Changed: = %v\n\n", floor, que[floor][orderType].hasOrder, que[floor][orderType].lastChangeTime)
+			fmt.Printf("\t\tFloor %d: has order = %t,last Changed: = %v\n", floor, que[floor][orderType].hasOrder, que[floor][orderType].lastChangeTime)
 		}
 	}
+	fmt.Println()
 }

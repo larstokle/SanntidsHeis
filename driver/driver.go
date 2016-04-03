@@ -64,7 +64,7 @@ func encodeLight(button int, floor int) int {
 }
 
 func Init() int {
-	return int(C.io_init(ET_comedi))
+	return int(C.io_init(ET_simulation))
 }
 
 func RunTopFloor() {
