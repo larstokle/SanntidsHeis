@@ -144,3 +144,11 @@ func GetFloorSignal() int {
 		return -1
 	}
 }
+
+func SetDoorOpen(value bool) {
+	if value {
+		C.io_set_bit(C.LIGHT_DOOR_OPEN)
+	} else {
+		C.io_clear_bit(C.LIGHT_DOOR_OPEN)
+	}
+}
