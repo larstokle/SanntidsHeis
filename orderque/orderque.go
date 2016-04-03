@@ -2,6 +2,7 @@ package orderque
 
 import (
 	. "../constants"
+	"../driver"
 	"fmt"
 	"time"
 )
@@ -29,6 +30,7 @@ func (que *OrderQue_t) AddOrder(floor int, orderType int) {
 	if !que.HasOrder(floor, orderType) {
 		que[floor][orderType].hasOrder = true
 		que[floor][orderType].lastChangeTime = time.Now()
+		driver.SetButtonLight(orderType, floor, true)
 	}
 }
 
@@ -36,6 +38,7 @@ func (que *OrderQue_t) RemoveOrder(floor int, orderType int) {
 	if que.HasOrder(floor, orderType) {
 		que[floor][orderType].hasOrder = false
 		que[floor][orderType].lastChangeTime = time.Now()
+		driver.SetButtonLight(orderType, floor, false)
 	}
 }
 
