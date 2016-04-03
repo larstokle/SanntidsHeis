@@ -6,8 +6,8 @@ import (
 )
 
 type Event_t struct {
-	floor     int
-	eventType int
+	Floor     int
+	EventType int
 }
 
 const FLOOR_SIGNAL = 3 // flyttes?
@@ -30,8 +30,8 @@ func checkButtons(event chan Event_t) {
 			lastButtonState[floor][button] = pressed
 			if pressed {
 				var newEvent Event_t //tungvint! lag oneliner!!
-				newEvent.floor = floor
-				newEvent.eventType = button
+				newEvent.Floor = floor
+				newEvent.EventType = button
 				event <- newEvent
 			}
 		}
@@ -58,8 +58,8 @@ func checkFloorSignal(event chan Event_t) {
 			lastFloorState = newFloorState
 			if newFloorState != -1 {
 				var newEvent Event_t
-				newEvent.floor = newFloorState
-				newEvent.eventType = FLOOR_SIGNAL
+				newEvent.Floor = newFloorState
+				newEvent.EventType = FLOOR_SIGNAL
 				event <- newEvent
 			}
 		}

@@ -2,9 +2,9 @@ package driver
 
 /*
 #cgo CFLAGS: -std=c11
-#cgo LDFLAGS: $./simulator/simelev.a /usr/lib/x86_64-linux-gnu/libphobos2.a -lpthread -lcomedi -lm
-#include "./io/io.h"
-#include "./channels/channels.h"
+#cgo LDFLAGS: ${SRCDIR}/simulator/simelev.a /usr/lib/x86_64-linux-gnu/libphobos2.a -lpthread -lcomedi -lm
+#include "./io.h"
+#include "./channels.h"
 */
 import "C"
 import (

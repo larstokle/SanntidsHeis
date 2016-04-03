@@ -1,4 +1,4 @@
-package CHANNELS
+package driver
 
 const ET_comedi = 0
 const ET_simulation = 1
