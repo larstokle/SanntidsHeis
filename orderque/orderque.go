@@ -73,11 +73,15 @@ func (que *OrderQue_t) EarliestOrderInside() Order_t {
 		return Order_t{-1, -1}
 	}
 
+	var nonInitializedTime time.Time
 	earliestOrder := Order_t{0, 0}
+	isInit := false
 	for floor := 0; floor < N_FLOORS; floor++ {
 		for orderType := 0; orderType < N_BUTTON_TYPES; orderType++ {
-			if que[floor][orderType].lastChangeTime.Before(que[earliestOrder.floor][earliestOrder.orderType].lastChangeTime) {
-				earliestOrder = Order_t{floor, orderType}
+			if (que[floor][orderType].hasOrder && (que[floor][orderType].lastChangeTime.Before(que[earliestOrder.floor][earliestOrder.orderType].lastChangeTime) && que[floor][orderType].lastChangeTime !=  nonInitializedTime || !isInit)){
+				earliestOrder = Order_t{floor: floor, orderType: orderType}
+				isInit = true
+
 			}
 		}
 	}

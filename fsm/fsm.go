@@ -42,6 +42,9 @@ func (elev ElevatorState) GetFloor() int {
 func (elev ElevatorState) GetDir() int {
 	return elev.dir
 }
+func (elev ElevatorState) GetDestination() int {
+	return elev.destination
+}
 
 func (elev *ElevatorState) NewDestination(destination int){
 	elev.destination = destination
@@ -65,6 +68,7 @@ func (elev *ElevatorState) NewFloorReached(newFloor int){
 	elev.floor = newFloor
 	driver.SetFloorIndicator(elev.floor)
 	if elev.floor == elev.destination{
+		elev.destination = -1
 		elev.goToStateDoorOpen()
 	}
 }

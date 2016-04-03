@@ -52,7 +52,16 @@ func encodeLight(button int, floor int) int {
 }
 
 func Init() int {
-	return int(C.io_init(ET_comedi))
+	returnVal := int(C.io_init(ET_comedi))
+	RunStop()
+
+	for i := 0; i < N_FLOORS; i++{
+		for j:= 0; j < N_BUTTON_TYPES; j++{
+			SetButtonLight(j,i,false)
+		}
+	}
+	
+	return returnVal
 }
 
 func RunTopFloor() {
