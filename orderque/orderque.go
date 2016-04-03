@@ -17,6 +17,14 @@ type Order_t struct {
 	orderType int
 }
 
+func (order Order_t)GetFloor() int {
+	return order.floor
+}
+
+func (order Order_t)Getype() int {
+	return order.orderType
+}
+
 func (que *OrderQue_t) AddOrder(floor int, orderType int) {
 	if !que.HasOrder(floor, orderType) {
 		que[floor][orderType].hasOrder = true
@@ -50,11 +58,11 @@ func (que *OrderQue_t) IsEmpty() bool {
 	for floor := 0; floor < N_FLOORS; floor++ {
 		for orderType := 0; orderType < N_BUTTON_TYPES; orderType++ {
 			if que[floor][orderType].hasOrder {
-				return true
+				return false
 			}
 		}
 	}
-	return false
+	return true
 }
 
 func (que *OrderQue_t) EarliestOrderInside() Order_t {
