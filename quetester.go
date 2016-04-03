@@ -1,6 +1,7 @@
 package main
 
 import (
+	. "./constants"
 	"./eventmgr"
 	"./orderque"
 	"fmt"
@@ -13,21 +14,21 @@ func main() {
 
 	eventmgr.CheckEvents(event)
 
-	fmt.Println("init don")
+	fmt.Println("init done")
 	for true {
 
 		newEvent := <-event
-		if newEvent.EventType < eventmgr.FLOOR_SIGNAL {
+		if newEvent.EventType < N_BUTTON_TYPES {
 			fmt.Printf("new order: %+v\n", newEvent)
 			que.AddOrder(newEvent.Floor, newEvent.EventType)
 			que.Print()
 		} else {
 			fmt.Printf("new floor: %d", newEvent.Floor)
-			que.CompleteOrder(newEvent.Floor, 0)
-			que.CompleteOrder(newEvent.Floor, 1)
-			que.CompleteOrder(newEvent.Floor, 2)
+			que.RemoveOrder(newEvent.Floor, 0)
+			que.RemoveOrder(newEvent.Floor, 1)
+			que.RemoveOrder(newEvent.Floor, 2)
 			que.Print()
-			fmt.Println("gue deleted")
+			fmt.Println("que deleted")
 		}
 
 	}

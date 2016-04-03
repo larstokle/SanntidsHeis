@@ -1,12 +1,12 @@
 package orderque
 
 import (
-	"../driver"
+	. "../constants"
 	"fmt"
 	"time"
 )
 
-type OrderQue_t [driver.N_FLOORS][driver.N_BUTTONS]struct {
+type OrderQue_t [N_FLOORS][N_ORDER_TYPES]struct {
 	hasOrder       bool
 	lastChangeTime time.Time
 	//assignedToID int //kanskje unødvendig? fjerner den encapsulation?
@@ -24,7 +24,7 @@ func (que *OrderQue_t) AddOrder(floor int, orderType int) {
 	}
 }
 
-func (que *OrderQue_t) CompleteOrder(floor int, orderType int) {
+func (que *OrderQue_t) RemoveOrder(floor int, orderType int) {
 	if que.HasOrder(floor, orderType) {
 		que[floor][orderType].hasOrder = false
 		que[floor][orderType].lastChangeTime = time.Now()
@@ -32,8 +32,8 @@ func (que *OrderQue_t) CompleteOrder(floor int, orderType int) {
 }
 
 func (thisQue *OrderQue_t) Sync(queToSync OrderQue_t) OrderQue_t { //add error returns?
-	for floor := 0; floor < driver.N_FLOORS; floor++ {
-		for orderType := 0; orderType < driver.N_BUTTONS; orderType++ {
+	for floor := 0; floor < N_FLOORS; floor++ {
+		for orderType := 0; orderType < N_BUTTON_TYPES; orderType++ {
 			if queToSync[floor][orderType].lastChangeTime.After(thisQue[floor][orderType].lastChangeTime) {
 				thisQue[floor][orderType] = queToSync[floor][orderType]
 			}
@@ -47,8 +47,8 @@ func (que *OrderQue_t) HasOrder(floor int, orderType int) bool {
 }
 
 func (que *OrderQue_t) IsEmpty() bool {
-	for floor := 0; floor < driver.N_FLOORS; floor++ {
-		for orderType := 0; orderType < driver.N_BUTTONS; orderType++ {
+	for floor := 0; floor < N_FLOORS; floor++ {
+		for orderType := 0; orderType < N_BUTTON_TYPES; orderType++ {
 			if que[floor][orderType].hasOrder {
 				return true
 			}
@@ -63,8 +63,8 @@ func (que *OrderQue_t) EarliestOrderInside() Order_t {
 	}
 
 	earliestOrder := Order_t{0, 0}
-	for floor := 0; floor < driver.N_FLOORS; floor++ {
-		for orderType := 0; orderType < driver.N_BUTTONS; orderType++ {
+	for floor := 0; floor < N_FLOORS; floor++ {
+		for orderType := 0; orderType < N_BUTTON_TYPES; orderType++ {
 			if que[floor][orderType].lastChangeTime.Before(que[earliestOrder.floor][earliestOrder.orderType].lastChangeTime) {
 				earliestOrder = Order_t{floor, orderType}
 			}
@@ -75,9 +75,9 @@ func (que *OrderQue_t) EarliestOrderInside() Order_t {
 
 func (que *OrderQue_t) Print() {
 	fmt.Println("OrderQue_t:")
-	for orderType := 0; orderType < driver.N_BUTTONS; orderType++ {
+	for orderType := 0; orderType < N_BUTTON_TYPES; orderType++ {
 		fmt.Printf("\tordertype: %d\n", orderType)
-		for floor := 0; floor < driver.N_FLOORS; floor++ {
+		for floor := 0; floor < N_FLOORS; floor++ {
 			fmt.Printf("\t\tFloor %d: has order = %t,last Changed: = %v\n", floor, que[floor][orderType].hasOrder, que[floor][orderType].lastChangeTime)
 		}
 	}

@@ -8,28 +8,16 @@ package driver
 */
 import "C"
 import (
+	. "../constants"
 	"time"
 )
 
-const (
-	N_FLOORS  = 4
-	N_BUTTONS = 3
-
-	BTN_UP   = 0
-	BTN_DOWN = 1
-	BTN_CMD  = 2
-
-	DIR_DOWN = -1
-	DIR_STOP = 0
-	DIR_UP   = 1
-)
-
 func ReadButton(button int, floor int) bool {
-	if floor < 0 || floor >= N_FLOORS || button < BTN_UP || button > BTN_CMD {
+	if floor < 0 || floor >= N_FLOORS || button < 0 || button > N_BUTTON_TYPES {
 		return false
 	}
 
-	var BTN_CHANNELS = [4][3]int{
+	var BTN_CHANNELS = [N_FLOORS][N_BUTTON_TYPES]int{
 		{C.BUTTON_UP1, C.BUTTON_DOWN1, C.BUTTON_COMMAND1},
 		{C.BUTTON_UP2, C.BUTTON_DOWN2, C.BUTTON_COMMAND2},
 		{C.BUTTON_UP3, C.BUTTON_DOWN3, C.BUTTON_COMMAND3},
@@ -50,11 +38,11 @@ func SetButtonLight(button int, floor int, value bool) {
 func encodeLight(button int, floor int) int {
 
 	channel := C.LIGHT_COMMAND1
-	if button == BTN_CMD {
+	if button == CMD {
 		channel = channel - floor
-	} else if button == BTN_UP && floor == 0 {
+	} else if button == UP && floor == 0 {
 		channel = C.LIGHT_UP1
-	} else if button == BTN_DOWN && floor == 3 {
+	} else if button == DOWN && floor == 3 {
 		channel = C.LIGHT_DOWN4
 	} else {
 		channel = C.LIGHT_UP2

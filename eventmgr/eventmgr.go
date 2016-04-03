@@ -1,6 +1,7 @@
 package eventmgr
 
 import (
+	. "../constants"
 	"../driver"
 	"strconv"
 	"time"
@@ -10,13 +11,6 @@ type Event_t struct {
 	Floor     int
 	EventType int
 }
-
-const (
-	UP           = 0
-	DOWN         = 1
-	CMD          = 2
-	FLOOR_SIGNAL = 3 // flyttes?
-)
 
 var eventTypes = [...]string{
 	"Up",
@@ -38,7 +32,7 @@ func CheckEvents(event chan Event_t) {
 }
 
 func checkButtons(event chan Event_t) {
-	var lastButtonState [driver.N_FLOORS][driver.N_BUTTONS]bool
+	var lastButtonState [N_FLOORS][N_BUTTON_TYPES]bool
 	floor, button := 0, 0
 
 	for true {
@@ -54,10 +48,10 @@ func checkButtons(event chan Event_t) {
 		}
 
 		button++
-		button = button % driver.N_BUTTONS
+		button = button % N_BUTTON_TYPES
 		if button == 0 {
 			floor++
-			floor = floor % driver.N_FLOORS
+			floor = floor % N_FLOORS
 		}
 
 		if floor == 0 {
