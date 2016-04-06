@@ -12,7 +12,7 @@
 	- [ ] quit
 	- [ ] start backup
 	- [ ] init
-	- [ ] swtich to local master
+	- [ ] switch to local master
 	- [ ] start elevator manager and network manager
 - [ ] ElevatorManager
 	- [x] HW
@@ -23,16 +23,16 @@
 		- [x] knappetrykk
 	- [ ] Cost 
 	- [ ] LocalEventmanager
-		- [ ] knappetrykk behandling
+		- [x] knappetrykk behandling
 		- [ ] feilevents
 	- [ ] Que
-		- [ ] new order
-		- [ ] neste ordre
-		- [ ] fjern ordre
+		- [x] new order
+		- [x] neste ordre
+		- [x] fjern ordre
 		- [ ] syncronize
-	- [ ] FSM
-		- [ ] new event
-		- [ ] get state
+	- [x] FSM
+		- [x] new event
+		- [x] get state
 - [ ] Log Manager
 	- [ ] write order
 	- [ ] read order
