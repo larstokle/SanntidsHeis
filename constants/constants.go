@@ -10,6 +10,9 @@ const (
 	CMD          = 2
 	FLOOR_SIGNAL = 3
 
+	FIRST_FLOOR = 0
+	TOP_FLOOR   = N_FLOORS - 1
+
 	DIR_DOWN = -1
 	DIR_STOP = 0
 	DIR_UP   = 1

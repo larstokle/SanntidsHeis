@@ -23,12 +23,12 @@ func (event Event_t) String() string {
 	return "Floor:" + strconv.Itoa(event.Floor) + " " + eventTypes[event.EventType]
 }
 
-func CheckEvents(event chan Event_t) {
+func CheckEvents(btnEvent chan Event_t, floorEvent chan int) {
 	driver.Init() //mulig flyttes til main?
 
-	go checkButtons(event)
+	go checkButtons(btnEvent)
 
-	go checkFloorSignal(event)
+	go checkFloorSignal(floorEvent)
 }
 
 func checkButtons(event chan Event_t) {
@@ -60,7 +60,7 @@ func checkButtons(event chan Event_t) {
 	}
 }
 
-func checkFloorSignal(event chan Event_t) {
+func checkFloorSignal(event chan int) {
 	lastFloorState := -1
 
 	for true {
@@ -68,10 +68,7 @@ func checkFloorSignal(event chan Event_t) {
 		if newFloorState != lastFloorState {
 			lastFloorState = newFloorState
 			if newFloorState != -1 {
-				var newEvent Event_t
-				newEvent.Floor = newFloorState
-				newEvent.EventType = FLOOR_SIGNAL
-				event <- newEvent
+				event <- newFloorState
 			}
 		}
 	}

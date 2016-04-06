@@ -18,11 +18,11 @@ type Order_t struct {
 	orderType int
 }
 
-func (order Order_t)GetFloor() int {
+func (order Order_t) GetFloor() int {
 	return order.floor
 }
 
-func (order Order_t)Getype() int {
+func (order Order_t) Getype() int {
 	return order.orderType
 }
 
@@ -58,7 +58,7 @@ func (que *OrderQue_t) HasOrder(floor int, orderType int) bool {
 }
 
 func (que *OrderQue_t) IsEmpty() bool {
-	for floor := 0; floor < N_FLOORS; floor++ {
+	for floor := FIRST_FLOOR; floor <= TOP_FLOOR; floor++ {
 		for orderType := 0; orderType < N_BUTTON_TYPES; orderType++ {
 			if que[floor][orderType].hasOrder {
 				return false
@@ -74,25 +74,39 @@ func (que *OrderQue_t) EarliestOrderInside() Order_t {
 	}
 
 	var nonInitializedTime time.Time
-	earliestOrder := Order_t{0, 0}
-	isInit := false
-	for floor := 0; floor < N_FLOORS; floor++ {
-		for orderType := 0; orderType < N_BUTTON_TYPES; orderType++ {
-			if (que[floor][orderType].hasOrder && (que[floor][orderType].lastChangeTime.Before(que[earliestOrder.floor][earliestOrder.orderType].lastChangeTime) && que[floor][orderType].lastChangeTime !=  nonInitializedTime || !isInit)){
-				earliestOrder = Order_t{floor: floor, orderType: orderType}
-				isInit = true
+	earliestOrder := Order_t{FIRST_FLOOR, DOWN} //Button doesn't exist, used as a dummy initializer only
 
+	for floor := FIRST_FLOOR; floor <= TOP_FLOOR; floor++ {
+		for orderType := 0; orderType < N_BUTTON_TYPES; orderType++ {
+			if currentHaveOrder := que[floor][orderType].hasOrder; currentHaveOrder {
+				currentTime := que[floor][orderType].lastChangeTime
+				earliestTime := que[earliestOrder.floor][earliestOrder.orderType].lastChangeTime
+				if currentTime.Before(earliestTime) || earliestTime == nonInitializedTime {
+					earliestOrder = Order_t{floor: floor, orderType: orderType}
+				}
 			}
 		}
 	}
 	return earliestOrder
 }
 
+func (que *OrderQue_t) NextOrderOfTypeInDir(currentFloor int, dir int, orderType int) int {
+	if dir == DIR_STOP {
+		dir = DIR_UP //kanskje noe annet her?
+	}
+	for checkFloor := currentFloor; checkFloor >= FIRST_FLOOR && checkFloor <= TOP_FLOOR; checkFloor += dir {
+		if que[checkFloor][orderType].hasOrder {
+			return checkFloor
+		}
+	}
+	return -1
+}
+
 func (que *OrderQue_t) Print() {
 	fmt.Println("OrderQue_t:")
 	for orderType := 0; orderType < N_BUTTON_TYPES; orderType++ {
 		fmt.Printf("\tordertype: %d\n", orderType)
-		for floor := 0; floor < N_FLOORS; floor++ {
+		for floor := FIRST_FLOOR; floor <= TOP_FLOOR; floor++ {
 			fmt.Printf("\t\tFloor %d: has order = %t,last Changed: = %v\n", floor, que[floor][orderType].hasOrder, que[floor][orderType].lastChangeTime)
 		}
 	}
