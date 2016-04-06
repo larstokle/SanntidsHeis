@@ -17,15 +17,15 @@ func main() {
 	i:= 0
 	//var melding msg
 	for {
-		kanal <- Event_t{1,i}
+		kanal <- i
 		//melding <-mottaker
 		mellom := <-mottaker
 		switch mellom.(type){
 		case Event_t:
-			fmt.Printf("Event_t: %+v \n", mellom)	
+			fmt.Printf("Event_t found: %+v \n", mellom)	
 
 		case int:
-			fmt.Printf("Int: %+v\n", mellom)	
+			fmt.Printf("Int found: %+v\n", mellom)	
 		}
 		i++
 			
