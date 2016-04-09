@@ -16,10 +16,10 @@ func main() {
 	kanal := make(chan []byte)//make ( chan (Event_t))
 	mottaker := make(chan []byte) //make ( chan (Event_t))
 	stopp := make(chan (bool))
-	MakeReceiver(":20000", mottaker, stopp)
+	// MakeReceiver(":20000", mottaker, stopp)
 
 
-	MakeSender("129.241.187.150:20000", kanal, stopp)
+	// MakeSender("129.241.187.150:20000", kanal, stopp)
 
 	i:= 0
 	

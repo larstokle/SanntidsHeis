@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-const UNASIGNED_ID = -1
+const UNASIGNED_ID = 0
 
 type OrderQue_t [N_FLOORS][N_ORDER_TYPES]struct {
 	hasOrder       bool
@@ -41,7 +41,7 @@ func (que *OrderQue_t) RemoveOrder(floor int, orderType int) {
 	if que.HasOrder(floor, orderType) {
 		que[floor][orderType].hasOrder = false
 		que[floor][orderType].lastChangeTime = time.Now()
-		queque[floor][orderType].assignedToID = UNASIGNED_ID
+		que[floor][orderType].assignedToID = UNASIGNED_ID
 		driver.SetButtonLight(orderType, floor, false)
 	}
 }
@@ -49,21 +49,21 @@ func (que *OrderQue_t) RemoveOrder(floor int, orderType int) {
 func (que *OrderQue_t) UnassignOrderToID(id int){
 	for floor := FIRST_FLOOR; floor < N_FLOORS; floor++ {
 		for orderType := 0; orderType < N_BUTTON_TYPES; orderType++ {
-			if queToSync[floor][orderType].assignedToID == id{
-				queToSync[floor][orderType].assignedToID = UNASIGNED_ID
+			if que[floor][orderType].assignedToID == id{
+				que[floor][orderType].assignedToID = UNASIGNED_ID
 			}
 		}
 	}
 }
 
 func (que *OrderQue_t) AssignOrderToID(floor int, orderType int, id int) bool{
-	if !que.hasOrder(floor, orderType){
+	if !que.HasOrder(floor, orderType){
 		return false
 	}
 
-	que.UnassignOrderToID(id int)
+	que.UnassignOrderToID(id)
 
-	queToSync[floor][orderType].assignedToID = id
+	que[floor][orderType].assignedToID = id
 	return true
 }
 

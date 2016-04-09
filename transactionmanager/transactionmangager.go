@@ -5,6 +5,7 @@ import (
 	"time"
 	"fmt"
 	"reflect"
+	"../eventmgr"
  
 	)
 
@@ -33,13 +34,15 @@ func StartTransactionManager() ( chan interface{} , chan interface{}){
 		for {
 			select{
 				case input := <- inChannel:
-					fmt.Println(input)
+					sendChannel <- Pack(input)
 
 				case receivedData := <-receiveChannel:
 					receivedUnknownType := Parse(receivedData)
 					switch received := receivedUnknownType.(type){
 					case Hartbeat_t:
 						elevators.NewHartBeat(received)
+					case eventmgr.Event_t:
+						outChannel <- received
 					default:
 						fmt.Printf("transactionmanager received unhandled type %+v. Received: %+v\n",reflect.TypeOf(receivedUnknownType) , receivedUnknownType)
 					}
