@@ -1,4 +1,4 @@
-package UDP
+package network
 
 import(
 	"time"
@@ -36,7 +36,7 @@ func MakeSender(addr string, msg chan []byte, quit chan bool) {
 }
 
 
-func MakeReciever(port string, message chan []byte, quit chan bool) {
+func MakeReceiver(port string, message chan []byte, quit chan bool) {
 
 	localAddr, err := net.ResolveUDPAddr("udp", port)
 	checkAndPrintError(err, "Resolve UDP error")
@@ -90,12 +90,12 @@ func GetLocalIP() string{
 }
 
 
-func GetOwnID() int{
+func GetLastIPByte() int{
 	addr := GetLocalIP()
 	lastByte := addr[12:15]
 	i,err := strconv.Atoi(lastByte)
 	
-	if !checkAndPrintError(err, "strconv error in GetOwnID") {
+	if !checkAndPrintError(err, "strconv error in GetLastIPByte") {
 		return i
 	} else {
 		return -1

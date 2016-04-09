@@ -1,10 +1,12 @@
 package main
 
 import(
-	."./UDP"
+	."./network"
 	"fmt"
 	"reflect"
 	"./eventmgr"
+	"./transactionmanager"
+	"time"
 	
 )
 
@@ -14,18 +16,21 @@ func main() {
 	kanal := make(chan []byte)//make ( chan (Event_t))
 	mottaker := make(chan []byte) //make ( chan (Event_t))
 	stopp := make(chan (bool))
-	MakeReciever(":20000", mottaker, stopp)
+	MakeReceiver(":20000", mottaker, stopp)
+
 
 	MakeSender("129.241.187.150:20000", kanal, stopp)
-	fmt.Println(GetOwnID())
+
 	i:= 0
-	//var melding msg
+	
+	transactionmanager.StartTransactionManager()
+
 	for {
 		tosend := eventmgr.Event_t{1, i}
-		kanal <- Pack(tosend)
+		kanal <- transactionmanager.Pack(tosend)
 
 		//kanal <- Pack(i)
-		newData := Parse(<-mottaker)
+		newData := transactionmanager.Parse(<-mottaker)
 		switch data := newData.(type){
 		case eventmgr.Event_t:
 			//newEvent := newData.(Event_t)
@@ -40,7 +45,7 @@ func main() {
 	
 
 		i++
-			
+		time.Sleep(time.Millisecond*1000)
 	}
 
 

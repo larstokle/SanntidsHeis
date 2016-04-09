@@ -7,10 +7,12 @@ import (
 	"time"
 )
 
+const UNASIGNED_ID = -1
+
 type OrderQue_t [N_FLOORS][N_ORDER_TYPES]struct {
 	hasOrder       bool
 	lastChangeTime time.Time
-	//assignedToID int //kanskje unødvendig? fjerner den encapsulation?
+	assignedToID int //kanskje unødvendig? fjerner den encapsulation?
 }
 
 type Order_t struct {
@@ -30,6 +32,7 @@ func (que *OrderQue_t) AddOrder(floor int, orderType int) {
 	if !que.HasOrder(floor, orderType) {
 		que[floor][orderType].hasOrder = true
 		que[floor][orderType].lastChangeTime = time.Now()
+		que[floor][orderType].assignedToID = UNASIGNED_ID
 		driver.SetButtonLight(orderType, floor, true)
 	}
 }
@@ -38,12 +41,34 @@ func (que *OrderQue_t) RemoveOrder(floor int, orderType int) {
 	if que.HasOrder(floor, orderType) {
 		que[floor][orderType].hasOrder = false
 		que[floor][orderType].lastChangeTime = time.Now()
+		queque[floor][orderType].assignedToID = UNASIGNED_ID
 		driver.SetButtonLight(orderType, floor, false)
 	}
 }
 
+func (que *OrderQue_t) UnassignOrderToID(id int){
+	for floor := FIRST_FLOOR; floor < N_FLOORS; floor++ {
+		for orderType := 0; orderType < N_BUTTON_TYPES; orderType++ {
+			if queToSync[floor][orderType].assignedToID == id{
+				queToSync[floor][orderType].assignedToID = UNASIGNED_ID
+			}
+		}
+	}
+}
+
+func (que *OrderQue_t) AssignOrderToID(floor int, orderType int, id int) bool{
+	if !que.hasOrder(floor, orderType){
+		return false
+	}
+
+	que.UnassignOrderToID(id int)
+
+	queToSync[floor][orderType].assignedToID = id
+	return true
+}
+
 func (thisQue *OrderQue_t) Sync(queToSync OrderQue_t) OrderQue_t { //add error returns?
-	for floor := 0; floor < N_FLOORS; floor++ {
+	for floor := FIRST_FLOOR; floor < N_FLOORS; floor++ {
 		for orderType := 0; orderType < N_BUTTON_TYPES; orderType++ {
 			if queToSync[floor][orderType].lastChangeTime.After(thisQue[floor][orderType].lastChangeTime) {
 				thisQue[floor][orderType] = queToSync[floor][orderType]
@@ -68,7 +93,7 @@ func (que *OrderQue_t) IsEmpty() bool {
 	return true
 }
 
-func (que *OrderQue_t) EarliestOrderInside() Order_t {
+func (que *OrderQue_t) EarliestNonAssignedOrder() Order_t {
 	if que.IsEmpty() {
 		return Order_t{-1, -1}
 	}
@@ -78,10 +103,10 @@ func (que *OrderQue_t) EarliestOrderInside() Order_t {
 
 	for floor := FIRST_FLOOR; floor <= TOP_FLOOR; floor++ {
 		for orderType := 0; orderType < N_BUTTON_TYPES; orderType++ {
-			if currentHaveOrder := que[floor][orderType].hasOrder; currentHaveOrder {
+			if que[floor][orderType].hasOrder  && (que[floor][orderType].assignedToID == UNASIGNED_ID) {
 				currentTime := que[floor][orderType].lastChangeTime
 				earliestTime := que[earliestOrder.floor][earliestOrder.orderType].lastChangeTime
-				if currentTime.Before(earliestTime) || earliestTime == nonInitializedTime {
+				if (currentTime.Before(earliestTime) || earliestTime == nonInitializedTime){
 					earliestOrder = Order_t{floor: floor, orderType: orderType}
 				}
 			}
