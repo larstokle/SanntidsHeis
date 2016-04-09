@@ -20,7 +20,12 @@ var eventTypes = [...]string{
 }
 
 func (event Event_t) String() string {
-	return "Floor:" + strconv.Itoa(event.Floor) + " " + eventTypes[event.EventType]
+	
+	if event.EventType < len(eventTypes){
+		return "Floor:" + strconv.Itoa(event.Floor) + ", Type: " + eventTypes[event.EventType]
+	}else{
+		return "Floor:" + strconv.Itoa(event.Floor) + ", Type unknown: " + strconv.Itoa(event.EventType)
+	}
 }
 
 func CheckEvents(btnEvent chan Event_t, floorEvent chan int) {

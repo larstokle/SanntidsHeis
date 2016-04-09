@@ -4,9 +4,11 @@ import(
 	."./UDP"
 	"fmt"
 	"reflect"
-	
+	"./eventmgr"
 	
 )
+
+
 
 func main() {
 	kanal := make(chan []byte)//make ( chan (Event_t))
@@ -15,17 +17,19 @@ func main() {
 	MakeReciever(":20000", mottaker, stopp)
 
 	MakeSender("129.241.187.150:20000", kanal, stopp)
-	GetLocalIP()
+	fmt.Println(GetOwnID())
 	i:= 0
 	//var melding msg
 	for {
-		//kanal <- Pack(Event_t{1, i})
-		kanal <- Pack(i)
-		newData := Unpack(<-mottaker)
-		switch newData.(type){
-		case Event_t:
+		tosend := eventmgr.Event_t{1, i}
+		kanal <- Pack(tosend)
+
+		//kanal <- Pack(i)
+		newData := Parse(<-mottaker)
+		switch data := newData.(type){
+		case eventmgr.Event_t:
 			//newEvent := newData.(Event_t)
-			fmt.Printf("Event_t found: %+v\n", newData)	
+			fmt.Printf("Event_t found: %+v\n", data)	
 
 		case int:
 			//newInt

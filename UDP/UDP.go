@@ -1,41 +1,20 @@
 package UDP
 
 import(
-	//"net"
-	"encoding/json"
-	.	"../constants"
 	"time"
 	"fmt"
 	"net"
-	"reflect"
+	"strconv"
 )
-type OrderQue_t [N_FLOORS][N_ORDER_TYPES]struct {
-	hasOrder       bool
-	lastChangeTime time.Time
-	//assignedToID int //kanskje unødvendig? fjerner den encapsulation?
-}
 
-type Order_t struct {
-	floor     int
-	orderType int
-}
-
-type Event_t struct {
-	Floor     int
-	EventType int
-}
-type msg struct{
-	varType string// prøv med: type
-	data interface{}
-}
 
 func MakeSender(addr string, msg chan []byte, quit chan bool) {
 
 	toAddr, err := net.ResolveUDPAddr("udp", addr)
-	CheckAndPrintError(err, "ResolveUDP error")
+	checkAndPrintError(err, "ResolveUDP error")
 
 	conn, err := net.DialUDP("udp", nil, toAddr)
-	CheckAndPrintError(err, "DialUDP error")
+	checkAndPrintError(err, "DialUDP error")
 
 	go func() {
 		defer conn.Close()
@@ -50,7 +29,7 @@ func MakeSender(addr string, msg chan []byte, quit chan bool) {
 			case newMsg := <-msg:
 				//fmt.Printf("Sender sending %+v \n", newMsg)
 				_, err := conn.Write(newMsg)
-				CheckAndPrintError(err, "Writing error")
+				checkAndPrintError(err, "WriteToUDP error")
 			}
 		}
 	}()
@@ -60,16 +39,11 @@ func MakeSender(addr string, msg chan []byte, quit chan bool) {
 func MakeReciever(port string, message chan []byte, quit chan bool) {
 
 	localAddr, err := net.ResolveUDPAddr("udp", port)
-
-	CheckAndPrintError(err, "Resolve UDP error")
+	checkAndPrintError(err, "Resolve UDP error")
 
 	conn, err := net.ListenUDP("udp", localAddr)
-
-	CheckAndPrintError(err, "ListenUDP error")
-
+	checkAndPrintError(err, "ListenUDP error")
 	
-	
-
 	go func() {
 		defer conn.Close()
 
@@ -85,23 +59,29 @@ func MakeReciever(port string, message chan []byte, quit chan bool) {
 				buf := make([]byte, 1024)
 				conn.SetReadDeadline(time.Now().Add(time.Millisecond * 2000))
 				n, _, err := conn.ReadFromUDP(buf)
-				CheckAndPrintError(err, "ReadFromUDP error")
-				if err == nil {
+				if !checkAndPrintError(err, "ReadFromUDP error"){
 					//fmt.Printf("Reciever recieved: %+v of size: %d\n",buf[0:n], n)
 					message <- buf[0:n]
 				}
-
 			}
 		}
 	}()
 }
 
 
-func CheckAndPrintError(err error, info string) {
-	if err != nil && !err.(net.Error).Timeout() {
-		fmt.Println(info, ": ", err)
-		//exit(1) maybe??
+func checkAndPrintError(err error, info string) bool {
+	if err != nil {
+		switch e := err.(type){
+		case net.Error:
+			if !e.Timeout(){
+				fmt.Println(info, ": ", err)
+			}
+		default:
+			fmt.Println(info, ": ", err)
+		}
+		return true
 	}
+	return false
 }
 
 func GetLocalIP() string{
@@ -109,4 +89,16 @@ func GetLocalIP() string{
 	return addr[1].String()	
 }
 
+
+func GetOwnID() int{
+	addr := GetLocalIP()
+	lastByte := addr[12:15]
+	i,err := strconv.Atoi(lastByte)
+	
+	if !checkAndPrintError(err, "strconv error in GetOwnID") {
+		return i
+	} else {
+		return -1
+	}
+}
 
