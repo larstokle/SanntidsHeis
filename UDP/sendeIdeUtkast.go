@@ -9,7 +9,6 @@ import(
 	"net"
 	"reflect"
 )
-
 type OrderQue_t [N_FLOORS][N_ORDER_TYPES]struct {
 	hasOrder       bool
 	lastChangeTime time.Time
@@ -30,13 +29,12 @@ type msg struct{
 	data interface{}
 }
 
-func MakeSender(addr string, msg chan interface{}, quit chan bool) {
+func MakeSender(addr string, msg chan []byte, quit chan bool) {
 
 	toAddr, err := net.ResolveUDPAddr("udp", addr)
 	CheckAndPrintError(err, "ResolveUDP error")
 
 	conn, err := net.DialUDP("udp", nil, toAddr)
-	//defer conn.Close()
 	CheckAndPrintError(err, "DialUDP error")
 
 	go func() {
@@ -50,8 +48,8 @@ func MakeSender(addr string, msg chan interface{}, quit chan bool) {
 					return
 				}
 			case newMsg := <-msg:
-				//fmt.Println("newMsg",pack(newMsg))
-				_, err := conn.Write(pack(newMsg))
+				//fmt.Printf("Sender sending %+v \n", newMsg)
+				_, err := conn.Write(newMsg)
 				CheckAndPrintError(err, "Writing error")
 			}
 		}
@@ -59,30 +57,7 @@ func MakeSender(addr string, msg chan interface{}, quit chan bool) {
 }
 
 
-func pack(data interface{})[]byte{
-	var b []byte
-	// newMsgType.varType = newData.(type) //evt
-	/*switch data.(type){
-		case OrderQue_t:
-			newMsgType = "que"
-		case Event_t:
-			newMsgType = "Event_t"
-		case int:
-			newMsgType = "int"
-		default:
-			fmt.Println("Fuck!")
-
-	}*/
-
-	newMsg := make(map[string]interface{})
-	newMsg[reflect.TypeOf(data).Name()] = data
-	//newMsg[newMsgType] = data
-	b,_ = json.Marshal(newMsg)
-	//fmt.Printf("%s \n",b)
-	return b
-}
-
-func MakeReciever(port string, message chan interface{}, quit chan bool) {
+func MakeReciever(port string, message chan []byte, quit chan bool) {
 
 	localAddr, err := net.ResolveUDPAddr("udp", port)
 
@@ -92,8 +67,8 @@ func MakeReciever(port string, message chan interface{}, quit chan bool) {
 
 	CheckAndPrintError(err, "ListenUDP error")
 
-	buf := make([]byte, 1024)
-	something := make(map[string]interface{})
+	
+	
 
 	go func() {
 		defer conn.Close()
@@ -107,29 +82,13 @@ func MakeReciever(port string, message chan interface{}, quit chan bool) {
 					return
 				}
 			default:
+				buf := make([]byte, 1024)
 				conn.SetReadDeadline(time.Now().Add(time.Millisecond * 2000))
 				n, _, err := conn.ReadFromUDP(buf)
 				CheckAndPrintError(err, "ReadFromUDP error")
 				if err == nil {
-
-					json.Unmarshal(buf[0:n], &something)
-					for k, v := range something{
-						switch k {
-						case "Event_t":
-							fmt.Println("found Event_t of type",reflect.TypeOf(v))
-							temp := make(map[string]Event_t)
-							json.Unmarshal(buf[0:n], &temp)
-							message <- temp[k]
-							//vv := v.(map[string]interface{})
-							//message <- Event_t{Floor: int(vv["Floor"].(float64)), EventType: int(vv["EventType"].(float64)) }
-						case "int":
-							fmt.Println("found int",reflect.TypeOf(v))
-							message <- int(v.(float64))
-						}
-					}
-
-					//message <- string(buf[0:n])
-					//message <- something
+					//fmt.Printf("Reciever recieved: %+v of size: %d\n",buf[0:n], n)
+					message <- buf[0:n]
 				}
 
 			}
@@ -137,11 +96,17 @@ func MakeReciever(port string, message chan interface{}, quit chan bool) {
 	}()
 }
 
+
 func CheckAndPrintError(err error, info string) {
 	if err != nil && !err.(net.Error).Timeout() {
 		fmt.Println(info, ": ", err)
 		//exit(1) maybe??
 	}
+}
+
+func GetLocalIP() string{
+	addr, _ := net.InterfaceAddrs()
+	return addr[1].String()	
 }
 
 
