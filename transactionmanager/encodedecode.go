@@ -43,7 +43,7 @@ func Pack(data interface{}) []byte{
 	newMsg := make(map[string]interface{})
 	newMsg[reflect.TypeOf(data).Name()] = data
 	b, err := json.Marshal(newMsg)
-	fmt.Printf("Packed %+v as %s \n",newMsg, b)
+	//fmt.Printf("Packed %+v as %s \n",newMsg, b)
 	if !checkAndPrintError(err, "Marshal error"){
 		return b
 	}

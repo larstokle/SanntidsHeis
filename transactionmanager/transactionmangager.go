@@ -59,7 +59,7 @@ func startHartbeat(sendChannel chan []byte){
 		beat := Hartbeat_t{Id: network.GetLastIPByte()}
 
 		for {
-			fmt.Printf("Sending hartbeat: %+v \n", beat)
+			//fmt.Printf("Sending hartbeat: %+v \n", beat)
 			sendChannel <- Pack(beat)
 			time.Sleep(time.Millisecond*200)
 		}
@@ -69,13 +69,13 @@ func startHartbeat(sendChannel chan []byte){
 func (elevators *elevatorMap_t) NewHartBeat(beat Hartbeat_t){
 	if _, exists := (*elevators)[beat.Id]; exists{
 		(*elevators)[beat.Id].Reset(time.Second*1)
-		fmt.Printf("Got hartbeat: %+v \n",beat)
 	}else{
 		(*elevators)[beat.Id] = time.AfterFunc(time.Second*1, func(){(*elevators).RemoveElevator(beat.Id)})
+		fmt.Printf("Got New hartbeat ID: %+v \n",beat)
 	}
 }
 
 func (elevators *elevatorMap_t) RemoveElevator(id int){
 	delete((*elevators),id)
-	//Send that this is deleted EX: delete assigned to in que
+	fmt.Printf("Lost hartbeat ID: %+v \n",id)
 }

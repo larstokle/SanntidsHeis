@@ -26,8 +26,8 @@ func main() {
 	transactionmanager.StartTransactionManager()
 
 	for {
-		tosend := eventmgr.Event_t{1, i}
-		kanal <- transactionmanager.Pack(tosend)
+		//tosend := eventmgr.Event_t{1, i}
+		//kanal <- transactionmanager.Pack(tosend)
 
 		//kanal <- Pack(i)
 		newData := transactionmanager.Parse(<-mottaker)
@@ -45,7 +45,7 @@ func main() {
 	
 
 		i++
-		time.Sleep(time.Millisecond*1000)
+		time.Sleep(time.Millisecond*2000)
 	}
 
 
