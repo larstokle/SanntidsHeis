@@ -15,8 +15,7 @@ type Event_t struct {
 var eventTypes = [...]string{
 	"Up",
 	"Down",
-	"Command",
-	"Floor Signal",
+	"Command"
 }
 
 func (event Event_t) String() string {
@@ -28,53 +27,55 @@ func (event Event_t) String() string {
 	}
 }
 
-func CheckEvents(btnEvent chan Event_t, floorEvent chan int) {
-	driver.Init() //mulig flyttes til main?
 
-	go checkButtons(btnEvent)
-
-	go checkFloorSignal(floorEvent)
-}
-
-func checkButtons(event chan Event_t) {
+func CheckButtons() chan Event_t{
+	event := make(chan Event_t)
 	var lastButtonState [N_FLOORS][N_BUTTON_TYPES]bool
 	floor, button := 0, 0
 
-	for true {
-		pressed := driver.ReadButton(button, floor)
-		if pressed != lastButtonState[floor][button] {
-			lastButtonState[floor][button] = pressed
-			if pressed {
-				var newEvent Event_t //tungvint! lag oneliner!!
-				newEvent.Floor = floor
-				newEvent.EventType = button
-				event <- newEvent
+	go func(){
+		for true {
+			pressed := driver.ReadButton(button, floor)
+			if pressed != lastButtonState[floor][button] {
+				lastButtonState[floor][button] = pressed
+				if pressed {
+					var newEvent Event_t //tungvint! lag oneliner!!
+					newEvent.Floor = floor
+					newEvent.EventType = button
+					event <- newEvent
+				}
+			}
+
+			button++
+			button = button % N_BUTTON_TYPES
+			if button == 0 {
+				floor++
+				floor = floor % N_FLOORS
+			}
+
+			if floor == 0 {
+				time.Sleep(time.Millisecond * 20)
 			}
 		}
+	}()
 
-		button++
-		button = button % N_BUTTON_TYPES
-		if button == 0 {
-			floor++
-			floor = floor % N_FLOORS
-		}
-
-		if floor == 0 {
-			time.Sleep(time.Millisecond * 20)
-		}
-	}
+	return event
 }
 
-func checkFloorSignal(event chan int) {
+func CheckFloorSignal() chan int{
+	event := make(chan int)
 	lastFloorState := -1
 
-	for true {
-		newFloorState := driver.GetFloorSignal()
-		if newFloorState != lastFloorState {
-			lastFloorState = newFloorState
-			if newFloorState != -1 {
-				event <- newFloorState
+	go func(){
+		for true {
+			newFloorState := driver.GetFloorSignal()
+			if newFloorState != lastFloorState {
+				lastFloorState = newFloorState
+				if newFloorState != -1 {
+					event <- newFloorState
+				}
 			}
 		}
-	}
+	}()
+	return event
 }

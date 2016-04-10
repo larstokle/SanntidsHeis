@@ -3,9 +3,10 @@ package fsm
 import (
 	"../driver"
 	"time"
-	//."../constants"
 	"fmt"
 	"math"
+	"../eventmgr"
+
 )
 
 type State int
@@ -31,14 +32,27 @@ type ElevatorState struct {
 	floor       int
 	dir         int
 	destination int
+	NeedCommand bool
 }
 
-func NewElevatorState(floorEvent chan int) ElevatorState {
+func NewElevator(floorEvent chan int) ElevatorState {
+	driver.Init()
 	var elev ElevatorState
-	//elev.floor = -1
+	elev.Msg = make(chan State)
+
+	floorEvent := eventmgr.CheckFloorSignal()
 	driver.RunDown()
 	elev.floor = <-floorEvent
 	elev.goToStateIdle()
+
+
+	go func(){
+		for {
+			newFloor := <- floorEvent
+			elev.NewFloorReached(newFloor)
+		}
+	}()
+
 	return elev
 }
 
@@ -107,4 +121,5 @@ func (elev *ElevatorState) goToStateIdle() {
 	fmt.Println("Going idle")
 	driver.RunStop()
 	elev.fsmState = STATE_IDLE
+	elev.NeedCommand <- true
 }
