@@ -1,48 +1,33 @@
 package main
 
 import(
-	."./network"
-	"fmt"
-	"reflect"
-	"./eventmgr"
-	"./transactionmanager"
+	"./network"
+	"./message"
+
 	"time"
+	"fmt"
+
 	
 )
 
 
 
 func main() {
-	kanal := make(chan []byte)//make ( chan (Event_t))
-	mottaker := make(chan []byte) //make ( chan (Event_t))
+	kanal := make(chan message.Message_t)
+	mottaker := make(chan message.Message_t) 
 	stopp := make(chan (bool))
-	// MakeReceiver(":20000", mottaker, stopp)
-
-
-	// MakeSender("129.241.187.150:20000", kanal, stopp)
+	
+	network.MakeReceiver(":20000", mottaker, stopp)
+	network.MakeSender("10.22.68.20:20000", kanal, stopp)
 
 	i:= 0
 	
-	transactionmanager.StartTransactionManager()
-
-	for {
-		//tosend := eventmgr.Event_t{1, i}
-		//kanal <- transactionmanager.Pack(tosend)
-
-		//kanal <- Pack(i)
-		newData := transactionmanager.Parse(<-mottaker)
-		switch data := newData.(type){
-		case eventmgr.Event_t:
-			//newEvent := newData.(Event_t)
-			fmt.Printf("Event_t found: %+v\n", data)	
-
-		case int:
-			//newInt
-			fmt.Printf("Int found: %+v\n", newData)
-		default:
-			fmt.Printf("random found: %+v, with type: %+v\n", newData, reflect.TypeOf(newData))
-		}
 	
+	for {
+
+		kanal <- message.Message_t{Source: network.GetLastIPByte(), Message_id: message.HEARTBEAT}
+		fmt.Printf("Recieved: %+v\n", <-mottaker)
+		//fmt.Printf("GetLastIPByte: %d \n", network.GetLastIPByte())
 
 		i++
 		time.Sleep(time.Millisecond*2000)
