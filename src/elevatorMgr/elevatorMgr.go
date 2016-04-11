@@ -5,6 +5,9 @@ import (
 	"fsm"
 	"eventmgr"
 	"transactionMgr"
+	."globals"
+	"fmt"
+	"message"
 )
 
 
@@ -15,38 +18,46 @@ func Start(){
 	btnPush := eventmgr.CheckButtons()
 
 	transMgr := transactionMgr.New()
-
 	go func(){//hmmm skal denne kjøre selv eller skal det go'es i main??
 		for{
 			select{
 			case newBtn := <- btnPush:
 				if !que.HasOrder(newBtn){
 					que.AddOrder(newBtn)
-					cost := 3 //localElev.GetCost(newBtn)
-					transMgr.DelegateOrder(newBtn, cost) //Denne kan ta inn func(){que.AssignOrder(ID)} 
+					cost := localElev.GetCost(newBtn)
+					if cost < fsm.INF_COST{
+						transMgr.RequestOrder(newBtn, cost)
+						que.AssignOrderToId(newBtn, transMgr.MyId())//DELETE------------------------
+						localElev.NewDestination(newBtn.Floor)
+					}
 				}
-			/*case newFromTrans := <- transMgr.Receive:
-				switch newFromTrans.Id{
-				case WANT:
-					order := newFromTrans.Button
-					cost := localElev.GetCost(order)
-					transMgr.StartDelegateOrder(order, cost)
+			case newMsg := <- transMgr.Receive:
+				switch newMsg.MessageId{
+				case message.NEW_ORDER:
+					if !que.HasOrder(newMsg.Button){
+						que.AddOrder(newMsg.Button)
+					} 
+				case message.DELEGATE_ORDER:
+					que.AssignOrderToId(newMsg.Button, newMsg.ElevatorId)
+					if newMsg.ElevatorId == transMgr.MyId(){
+						localElev.NewDestination(newMsg.Button.Floor)
+					} else if !que.IsIdAssigned(transMgr.MyId()){
+						newOrder := que.EarliestNonAssignedOrder() // switch with calculate from twoelevtest
+						cost := localElev.GetCost(newOrder)
+						transMgr.RequestOrder(newOrder, cost)
+					}
 				}
-				//check type
-				//if btn: que.AddOrder(data)
-				//cost := localElev.GetCost(newBtn)
-				//cost ok for this?
-				//yes: toTrans <- {order, cost}
-				//no: do nothing
-				//if someone wants new order
-				//calculate cost and compareget 
-				//toTrans <- Ok/notOK
-				break*/
-			default:
-				if localElev.NeedNewDestination() {
-
-				}
-				break
+			case floorDone := <-localElev.OrderDone:
+					que.RemoveOrdersOnFloor(floorDone)
+					newOrder := que.EarliestNonAssignedOrder() // switch with calculate from twoelevtest
+					cost := localElev.GetCost(newOrder)
+					transMgr.RequestOrder(newOrder, cost)
+					if newOrder != NONVALID_BUTTON{//DELETE------------------------
+						fmt.Printf("setting NewDestination: %+v \n", newOrder)
+						que.AssignOrderToId(newOrder, transMgr.MyId())
+						localElev.NewDestination(newOrder.Floor)
+					}
+				
 			}
 		}
 

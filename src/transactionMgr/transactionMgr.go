@@ -17,17 +17,18 @@ type Heartbeat_t struct{
 }
 
 type transactionMgr_t struct{
-	Receive chan Button_t //bad naming. it is the output from network
+	Receive chan message.Message_t //bad naming. it is the output from network
 	netReceive chan message.Message_t
 	netSend chan message.Message_t
 	idOnline_timers map[int]*time.Timer
 	myId int
 	delegatingOrder bool
+	delegation map[Button_t]map[int]int
 }
 
 func New() *transactionMgr_t{
 	var transMgr transactionMgr_t
-	transMgr.Receive = make(chan Button_t)
+	transMgr.Receive = make(chan message.Message_t)
 	transMgr.netSend, _ = network.MakeSender(broadCastAddr + port)
 	transMgr.netReceive, _ = network.MakeReceiver(port)
 	transMgr.idOnline_timers = make(map[int]*time.Timer)
@@ -45,9 +46,9 @@ func New() *transactionMgr_t{
 			case message.NEW_ORDER: //new event
 				fmt.Printf("transMgr Received NEW_ORDER: %+v",receivedData)
 				if receivedData.Source != transMgr.myId{
-					transMgr.Receive <- receivedData.Button
+					transMgr.Receive <- receivedData
 				}
-			case message.WANTS_ORDER:
+			case message.REQUEST_ORDER:
 				// if receivedData.Source != myId{
 				// 	toClient <- struct{ID: WANT, BTN: receivedData.Button}
 				// 	transMgr.delegatingOrder = true
@@ -90,6 +91,15 @@ func (transMgr *transactionMgr_t) RemoveElevator(id int){
 }
 
 func (transMgr *transactionMgr_t) DelegateOrder(order Button_t, cost int){
-	transMgr.netSend <- message.Message_t{Source: transMgr.myId, MessageId: message.NEW_ORDER, Button: order}
+	transMgr.netSend <- message.Message_t{Source: transMgr.myId, MessageId: message.DELEGATE_ORDER, Button: order}
 	fmt.Println("should now DelegateOrder like a PRO!")
+}
+
+func  (transMgr *transactionMgr_t) RequestOrder(order Button_t, cost int){
+	fmt.Println("Sending a RequestOrder ")
+	
+}
+
+func (transMgr *transactionMgr_t) MyId() int{
+	return transMgr.myId
 }

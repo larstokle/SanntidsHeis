@@ -25,6 +25,7 @@ var states = [...]string{
 
 
 const UNDEFINED_DESTINATION = -1
+const INF_COST = 255
 
 func (state State) String() string {
 	return states[state]
@@ -35,13 +36,14 @@ type ElevatorState struct {
 	floor       int
 	dir         Direction_t
 	destination int
+	OrderDone chan int
 }
 
 func NewElevator() *ElevatorState {
 	driver.Init()
 	var elev ElevatorState
 	elev.destination = UNDEFINED_DESTINATION
-	
+	elev.OrderDone = make(chan int)
 	floorEvent  := eventmgr.CheckFloorSignal()
 	driver.RunDown()
 	elev.NewFloorReached(<-floorEvent)
@@ -82,7 +84,7 @@ func CalculateDir(destination int, currentFloor int) Direction_t {
 func (elev *ElevatorState) NewDestination(destination int) {
 	fmt.Printf("new destination = %d\n", destination)
 	elev.destination = destination
-	if destination == elev.floor {
+	if destination == elev.floor && elev.fsmState != STATE_DOOR_OPEN{ //forslag til nytt: reset the afterfunc timer in goToStateDoorOpen() if STATE_DOOR_OPEN
 		elev.goToStateDoorOpen()
 	} else if elev.fsmState == STATE_IDLE{
 		elev.goToStateMoving(CalculateDir(destination, elev.floor))
@@ -96,6 +98,7 @@ func (elev *ElevatorState) NewFloorReached(newFloor int) {
 	if elev.floor == elev.destination {
 		elev.destination = UNDEFINED_DESTINATION
 		elev.goToStateDoorOpen()
+		//<- Need new order
 	}
 }
 
@@ -103,6 +106,7 @@ func (elev *ElevatorState) goToStateDoorOpen() {
 	fmt.Println("Door Opening")
 	driver.RunStop()
 	elev.fsmState = STATE_DOOR_OPEN
+	elev.OrderDone <- elev.floor
 	driver.SetDoorOpen(true)
 
 	time.AfterFunc(time.Second*3, func() {
@@ -134,5 +138,13 @@ func (elev *ElevatorState) goToStateIdle() {
 }
 
 func (elev *ElevatorState) NeedNewDestination() bool{
-	return elev.fsmState == STATE_IDLE || elev.fsmState == STATE_DOOR_OPEN
+	return elev.destination == -1
+}
+
+func (elev *ElevatorState) GetCost(order Button_t) int{
+	if elev.destination != UNDEFINED_DESTINATION{
+			return INF_COST
+	} else{
+			return 0
+		}
 }

@@ -2,6 +2,8 @@ package globals
 
 import "strconv"
 
+
+
 const (
 	N_FLOORS       = 4
 	N_BUTTON_TYPES = 3
@@ -11,6 +13,8 @@ const (
 	TOP_FLOOR   = N_FLOORS - 1
 
 	NONLEGAL_ID = -1
+
+
 
 )
 
@@ -50,3 +54,4 @@ func (btn Button_t) String() string {
 	}
 }
 
+var NONVALID_BUTTON = Button_t{FIRST_FLOOR, DOWN}

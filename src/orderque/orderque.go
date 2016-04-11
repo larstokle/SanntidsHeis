@@ -15,18 +15,6 @@ type orderQue_t [N_FLOORS][N_ORDER_TYPES]struct {
 	assignedToID int //kanskje unødvendig? fjerner den encapsulation?
 }
 
-type Order_t struct {
-	floor     int
-	orderType int
-}
-
-func (order Order_t) GetFloor() int {
-	return order.floor
-}
-
-func (order Order_t) Getype() int {
-	return order.orderType
-}
 
 func NewOrderQue()orderQue_t{
 	var que orderQue_t
@@ -58,6 +46,13 @@ func (que *orderQue_t) RemoveOrder(button Button_t) {
 	}
 }
 
+func (que *orderQue_t) RemoveOrdersOnFloor(floor int){
+	for orderType := 0; orderType < N_BUTTON_TYPES; orderType++ {
+		order := Button_t{Floor: floor, ButtonType: orderType}
+		que.RemoveOrder(order)
+	}
+}
+
 func (que *orderQue_t) UnassignOrderToID(id int){
 	for floor := FIRST_FLOOR; floor < N_FLOORS; floor++ {
 		for orderType := 0; orderType < N_BUTTON_TYPES; orderType++ {
@@ -68,7 +63,7 @@ func (que *orderQue_t) UnassignOrderToID(id int){
 	}
 }
 
-func (que *orderQue_t) AssignOrderToID(button Button_t, id int) bool{
+func (que *orderQue_t) AssignOrderToId(button Button_t, id int) bool{
 	if !que.HasOrder(button){
 		return false
 	}
@@ -78,6 +73,19 @@ func (que *orderQue_t) AssignOrderToID(button Button_t, id int) bool{
 	que[button.Floor][button.ButtonType].assignedToID = id
 	return true
 }
+
+func (que *orderQue_t) IsIdAssigned(id int) bool{
+	for floor := FIRST_FLOOR; floor < N_FLOORS; floor++ {
+		for orderType := 0; orderType < N_BUTTON_TYPES; orderType++ {
+			if que[floor][orderType].assignedToID == id{
+				return true
+			}
+		}
+	}
+	return false
+}
+
+
 
 func (thisQue *orderQue_t) Sync(queToSync orderQue_t) orderQue_t { //add error returns?
 	for floor := FIRST_FLOOR; floor < N_FLOORS; floor++ {
@@ -105,21 +113,21 @@ func (que *orderQue_t) IsEmpty() bool {
 	return true
 }
 
-func (que *orderQue_t) EarliestNonAssignedOrder() Order_t {
+func (que *orderQue_t) EarliestNonAssignedOrder() Button_t {
 	if que.IsEmpty() {
-		return Order_t{-1, -1}
+		return NONVALID_BUTTON
 	}
 
-	nonValidOrder := Order_t{FIRST_FLOOR, DOWN}
-	earliestOrder := nonValidOrder
+	
+	earliestOrder := NONVALID_BUTTON
 
 	for floor := FIRST_FLOOR; floor <= TOP_FLOOR; floor++ {
 		for orderType := 0; orderType < N_BUTTON_TYPES; orderType++ {
 			if que[floor][orderType].hasOrder  && (que[floor][orderType].assignedToID == UNASIGNED_ID) {
 				currentTime := que[floor][orderType].lastChangeTime
-				earliestTime := que[earliestOrder.floor][earliestOrder.orderType].lastChangeTime
-				if currentTime.Before(earliestTime) || earliestOrder == nonValidOrder{
-					earliestOrder = Order_t{floor: floor, orderType: orderType}
+				earliestTime := que[earliestOrder.Floor][earliestOrder.ButtonType].lastChangeTime
+				if currentTime.Before(earliestTime) || earliestOrder == NONVALID_BUTTON{
+					earliestOrder = Button_t{Floor: floor, ButtonType: orderType}
 				}
 			}
 		}
