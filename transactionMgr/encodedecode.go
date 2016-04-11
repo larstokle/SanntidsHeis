@@ -1,4 +1,4 @@
-package transactionmanager
+package transactionMgr
 
 import( 
 	"encoding/json"

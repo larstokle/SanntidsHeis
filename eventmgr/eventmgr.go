@@ -5,6 +5,7 @@ import (
 	"../driver"
 	"strconv"
 	"time"
+	"fmt"
 )
 
 type Event_t struct {
@@ -15,8 +16,9 @@ type Event_t struct {
 var eventTypes = [...]string{
 	"Up",
 	"Down",
-	"Command"
+	"Command",
 }
+
 
 func (event Event_t) String() string {
 	
@@ -39,6 +41,7 @@ func CheckButtons() chan Event_t{
 			if pressed != lastButtonState[floor][button] {
 				lastButtonState[floor][button] = pressed
 				if pressed {
+					fmt.Println("button pressed!")
 					var newEvent Event_t //tungvint! lag oneliner!!
 					newEvent.Floor = floor
 					newEvent.EventType = button
