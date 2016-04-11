@@ -1,0 +1,35 @@
+PACKAGE DOCUMENTATION
+
+package fsm
+    import "C:\Users\eirik\SanntidsHeis\fsm"
+
+
+TYPES
+
+type ElevatorState struct {
+    // contains filtered or unexported fields
+}
+
+func (elev ElevatorState) GetDestination() int
+
+func (elev ElevatorState) GetDir() int
+
+func (elev ElevatorState) GetFloor() int
+
+func (elev *ElevatorState) GetState() State
+
+func (elev *ElevatorState) NewDestination(destination int)
+
+func (elev *ElevatorState) NewFloorReached(newFloor int)
+
+type State int
+
+const (
+    STATE_IDLE State = iota
+    STATE_MOVING
+    STATE_DOOR_OPEN
+)
+
+func (state State) String() string
+
+

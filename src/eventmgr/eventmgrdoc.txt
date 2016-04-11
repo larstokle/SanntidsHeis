@@ -1,0 +1,27 @@
+PACKAGE DOCUMENTATION
+
+package eventmgr
+    import "./eventmgr"
+
+
+
+CONSTANTS
+
+const FLOOR_SIGNAL = 3 // flyttes?
+
+
+
+FUNCTIONS
+
+func CheckEvents(event chan Event_t)
+
+
+TYPES
+
+type Event_t struct {
+    // contains filtered or unexported fields
+}
+
+
+
+
