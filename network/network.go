@@ -5,10 +5,12 @@ import(
 	"fmt"
 	"net"
 	"strconv"
+	."../message"
+	"encoding/json"
 )
 
 
-func MakeSender(addr string, msg chan []byte, quit chan bool) {
+func MakeSender(addr string, msg chan Message_t, quit chan bool) {
 
 	toAddr, err := net.ResolveUDPAddr("udp", addr)
 	checkAndPrintError(err, "ResolveUDP error")
@@ -28,7 +30,9 @@ func MakeSender(addr string, msg chan []byte, quit chan bool) {
 				}
 			case newMsg := <-msg:
 				//fmt.Printf("Sender sending %+v \n", newMsg)
-				_, err := conn.Write(newMsg)
+
+				json_msg, _ := json.Marshal(newMsg)
+				_, err := conn.Write(json_msg)
 				checkAndPrintError(err, "WriteToUDP error")
 			}
 		}
@@ -36,7 +40,7 @@ func MakeSender(addr string, msg chan []byte, quit chan bool) {
 }
 
 
-func MakeReceiver(port string, message chan []byte, quit chan bool) {
+func MakeReceiver(port string, msg chan Message_t, quit chan bool) {
 
 	localAddr, err := net.ResolveUDPAddr("udp", port)
 	checkAndPrintError(err, "Resolve UDP error")
@@ -61,7 +65,11 @@ func MakeReceiver(port string, message chan []byte, quit chan bool) {
 				n, _, err := conn.ReadFromUDP(buf)
 				if !checkAndPrintError(err, "ReadFromUDP error"){
 					//fmt.Printf("Reciever recieved: %+v of size: %d\n",buf[0:n], n)
-					message <- buf[0:n]
+					var recived Message_t
+					json.Unmarshal(buf[0:n], &recived)
+					//fmt.Printf("Reciever recieved: %+v \n",recived)
+
+					msg <- recived
 				}
 			}
 		}

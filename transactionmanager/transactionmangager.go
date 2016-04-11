@@ -10,7 +10,7 @@ import (
 	)
 
 const port = ":20001"
-const broadCastAddr = "129.241.187.255"
+const broadCastAddr = "10.22.68.20"//"129.241.187.255"
 
 type Hartbeat_t struct{
 	Id int
