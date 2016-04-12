@@ -1,7 +1,7 @@
 package main
 
 import (
-	. "./constants"
+	. "./globals"
 	"./eventmgr"
 	"./orderque"
 	"fmt"

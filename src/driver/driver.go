@@ -8,7 +8,7 @@ package driver
 */
 import "C"
 import (
-	. "../constants"
+	. "globals"
 	"time"
 )
 

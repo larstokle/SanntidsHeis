@@ -1,14 +1,14 @@
 package main
 
 import (
-	. "./constants"
+	. "./globals"
 	"./eventmgr"
 	"./fsm"
 	"./orderque"
 	"fmt"
 	"math"
 	"time"
-	"./transactionmanager"
+	"./transactionMgr"
 )
 
 func main() {
@@ -20,7 +20,7 @@ func main() {
 
 	elevatorData := fsm.NewElevatorState(floorEvent)
 	fmt.Println("State is", elevatorData.GetState())
-	toTrans, fromTrans := transactionmanager.StartTransactionManager()
+	toTrans, fromTrans := transactionMgr.StartTransactionManager()
 	for true {
 		select {
 		case newEvent := <-floorEvent:

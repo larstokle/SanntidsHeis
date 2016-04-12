@@ -5,12 +5,14 @@ import(
 	"fmt"
 	"net"
 	"strconv"
-	."../message"
+	."message"
 	"encoding/json"
 )
 
 
-func MakeSender(addr string, msg chan Message_t, quit chan bool) {
+func MakeSender(addr string) (chan Message_t, chan bool) {
+	msg := make(chan Message_t)
+	quit := make(chan bool)
 
 	toAddr, err := net.ResolveUDPAddr("udp", addr)
 	checkAndPrintError(err, "ResolveUDP error")
@@ -37,10 +39,13 @@ func MakeSender(addr string, msg chan Message_t, quit chan bool) {
 			}
 		}
 	}()
+	return msg, quit
 }
 
 
-func MakeReceiver(port string, msg chan Message_t, quit chan bool) {
+func MakeReceiver(port string) (chan Message_t, chan bool) {
+	msg := make(chan Message_t)
+	quit := make(chan bool)
 
 	localAddr, err := net.ResolveUDPAddr("udp", port)
 	checkAndPrintError(err, "Resolve UDP error")
@@ -74,6 +79,7 @@ func MakeReceiver(port string, msg chan Message_t, quit chan bool) {
 			}
 		}
 	}()
+	return msg, quit
 }
 
 
@@ -100,11 +106,23 @@ func GetLocalIP() string{
 
 func GetLastIPByte() int{
 	addr := GetLocalIP()
-	lastByte := addr[12:15]
-	i,err := strconv.Atoi(lastByte)
+	dot := 0
+	backslash := 0
+	for i, ch := range addr {
+		if string(ch) == "."{
+			dot = i + 1
+		}
+		if string(ch) == "/"{
+			backslash = i
+			break
+		}
+	}
+	
+	lastByte := addr[dot:backslash]
+	num,err := strconv.Atoi(lastByte)
 	
 	if !checkAndPrintError(err, "strconv error in GetLastIPByte") {
-		return i
+		return num
 	} else {
 		return -1
 	}

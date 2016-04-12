@@ -1,13 +1,13 @@
 package orderque
 
 import (
-	. "../constants"
-	"../driver"
+	. "globals"
+	"driver"
 	"fmt"
 	"time"
 )
 
-const UNASIGNED_ID = 0
+const UNASIGNED_ID = NONLEGAL_ID
 
 type orderQue_t [N_FLOORS][N_ORDER_TYPES]struct {
 	hasOrder       bool
@@ -15,39 +15,41 @@ type orderQue_t [N_FLOORS][N_ORDER_TYPES]struct {
 	assignedToID int //kanskje unødvendig? fjerner den encapsulation?
 }
 
-type Order_t struct {
-	floor     int
-	orderType int
-}
-
-func (order Order_t) GetFloor() int {
-	return order.floor
-}
-
-func (order Order_t) Getype() int {
-	return order.orderType
-}
 
 func NewOrderQue()orderQue_t{
 	var que orderQue_t
+	startTime := time.Now()
+	for floor := FIRST_FLOOR; floor < N_FLOORS; floor++ {
+		for orderType := 0; orderType < N_BUTTON_TYPES; orderType++ {
+			que[floor][orderType].assignedToID = UNASIGNED_ID
+			que[floor][orderType].lastChangeTime = startTime
+		}
+	}
 	return que
 }
 
-func (que *orderQue_t) AddOrder(floor int, orderType int) {
-	if !que.HasOrder(floor, orderType) {
-		que[floor][orderType].hasOrder = true
-		que[floor][orderType].lastChangeTime = time.Now()
-		que[floor][orderType].assignedToID = UNASIGNED_ID
-		driver.SetButtonLight(orderType, floor, true)
+func (que *orderQue_t) AddOrder(button Button_t) {
+	if !que.HasOrder(button) {
+		que[button.Floor][button.ButtonType].hasOrder = true
+		que[button.Floor][button.ButtonType].lastChangeTime = time.Now()
+		que[button.Floor][button.ButtonType].assignedToID = UNASIGNED_ID
+		driver.SetButtonLight(button.ButtonType, button.Floor, true)
 	}
 }
 
-func (que *orderQue_t) RemoveOrder(floor int, orderType int) {
-	if que.HasOrder(floor, orderType) {
-		que[floor][orderType].hasOrder = false
-		que[floor][orderType].lastChangeTime = time.Now()
-		que[floor][orderType].assignedToID = UNASIGNED_ID
-		driver.SetButtonLight(orderType, floor, false)
+func (que *orderQue_t) RemoveOrder(button Button_t) {
+	if que.HasOrder(button) {
+		que[button.Floor][button.ButtonType].hasOrder = false
+		que[button.Floor][button.ButtonType].lastChangeTime = time.Now()
+		que[button.Floor][button.ButtonType].assignedToID = UNASIGNED_ID
+		driver.SetButtonLight(button.ButtonType, button.Floor, false)
+	}
+}
+
+func (que *orderQue_t) RemoveOrdersOnFloor(floor int){
+	for orderType := 0; orderType < N_BUTTON_TYPES; orderType++ {
+		order := Button_t{Floor: floor, ButtonType: orderType}
+		que.RemoveOrder(order)
 	}
 }
 
@@ -61,16 +63,29 @@ func (que *orderQue_t) UnassignOrderToID(id int){
 	}
 }
 
-func (que *orderQue_t) AssignOrderToID(floor int, orderType int, id int) bool{
-	if !que.HasOrder(floor, orderType){
+func (que *orderQue_t) AssignOrderToId(button Button_t, id int) bool{
+	if !que.HasOrder(button){
 		return false
 	}
 
 	que.UnassignOrderToID(id)
 
-	que[floor][orderType].assignedToID = id
+	que[button.Floor][button.ButtonType].assignedToID = id
 	return true
 }
+
+func (que *orderQue_t) IsIdAssigned(id int) bool{
+	for floor := FIRST_FLOOR; floor < N_FLOORS; floor++ {
+		for orderType := 0; orderType < N_BUTTON_TYPES; orderType++ {
+			if que[floor][orderType].assignedToID == id{
+				return true
+			}
+		}
+	}
+	return false
+}
+
+
 
 func (thisQue *orderQue_t) Sync(queToSync orderQue_t) orderQue_t { //add error returns?
 	for floor := FIRST_FLOOR; floor < N_FLOORS; floor++ {
@@ -83,8 +98,8 @@ func (thisQue *orderQue_t) Sync(queToSync orderQue_t) orderQue_t { //add error r
 	return *thisQue
 }
 
-func (que *orderQue_t) HasOrder(floor int, orderType int) bool {
-	return que[floor][orderType].hasOrder
+func (que *orderQue_t) HasOrder(button Button_t) bool {
+	return que[button.Floor][button.ButtonType].hasOrder
 }
 
 func (que *orderQue_t) IsEmpty() bool {
@@ -98,21 +113,21 @@ func (que *orderQue_t) IsEmpty() bool {
 	return true
 }
 
-func (que *orderQue_t) EarliestNonAssignedOrder() Order_t {
+func (que *orderQue_t) EarliestNonAssignedOrder() Button_t {
 	if que.IsEmpty() {
-		return Order_t{-1, -1}
+		return NONVALID_BUTTON
 	}
 
-	var nonInitializedTime time.Time
-	earliestOrder := Order_t{FIRST_FLOOR, DOWN} //Button doesn't exist, used as a dummy initializer only
+	
+	earliestOrder := NONVALID_BUTTON
 
 	for floor := FIRST_FLOOR; floor <= TOP_FLOOR; floor++ {
 		for orderType := 0; orderType < N_BUTTON_TYPES; orderType++ {
 			if que[floor][orderType].hasOrder  && (que[floor][orderType].assignedToID == UNASIGNED_ID) {
 				currentTime := que[floor][orderType].lastChangeTime
-				earliestTime := que[earliestOrder.floor][earliestOrder.orderType].lastChangeTime
-				if (currentTime.Before(earliestTime) || earliestTime == nonInitializedTime){
-					earliestOrder = Order_t{floor: floor, orderType: orderType}
+				earliestTime := que[earliestOrder.Floor][earliestOrder.ButtonType].lastChangeTime
+				if currentTime.Before(earliestTime) || earliestOrder == NONVALID_BUTTON{
+					earliestOrder = Button_t{Floor: floor, ButtonType: orderType}
 				}
 			}
 		}

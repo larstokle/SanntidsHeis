@@ -1,35 +1,15 @@
 package eventmgr
 
 import (
-	. "../constants"
-	"../driver"
-	"strconv"
+	. "globals"
+	"driver"
 	"time"
+	"fmt"
 )
 
-type Event_t struct {
-	Floor     int
-	EventType int
-}
 
-var eventTypes = [...]string{
-	"Up",
-	"Down",
-	"Command"
-}
-
-func (event Event_t) String() string {
-	
-	if event.EventType < len(eventTypes){
-		return "Floor:" + strconv.Itoa(event.Floor) + ", Type: " + eventTypes[event.EventType]
-	}else{
-		return "Floor:" + strconv.Itoa(event.Floor) + ", Type unknown: " + strconv.Itoa(event.EventType)
-	}
-}
-
-
-func CheckButtons() chan Event_t{
-	event := make(chan Event_t)
+func CheckButtons() chan Button_t{
+	event := make(chan Button_t, 100)
 	var lastButtonState [N_FLOORS][N_BUTTON_TYPES]bool
 	floor, button := 0, 0
 
@@ -39,9 +19,10 @@ func CheckButtons() chan Event_t{
 			if pressed != lastButtonState[floor][button] {
 				lastButtonState[floor][button] = pressed
 				if pressed {
-					var newEvent Event_t //tungvint! lag oneliner!!
+					fmt.Println("button pressed!")
+					var newEvent Button_t //tungvint! lag oneliner!!
 					newEvent.Floor = floor
-					newEvent.EventType = button
+					newEvent.ButtonType = button
 					event <- newEvent
 				}
 			}
