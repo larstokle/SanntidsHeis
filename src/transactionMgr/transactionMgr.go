@@ -4,7 +4,6 @@ import (
 	"network"
 	"time"
 	"fmt"
-	"reflect"
 	"message" 
 	."globals"
 	)
@@ -73,22 +72,30 @@ func New() *transactionMgr_t{
 				if oldCost , present := transMgr.delegation[order][id]; !present{
 					transMgr.delegation[order][id] = newCost
 					if len(transMgr.delegation[order]) == len(transMgr.heartbeatTimers){
+						lowestCostId := 256
+						lowestCost := 1000
+						for id, cost := range transMgr.delegation[order]{
+							if cost < lowestCost || (cost == lowestCost && id < lowestCostId){
+								lowestCostId = id
+								lowestCost = cost
+							}
+						}
 						fmt.Println("DELEGATE NOW FUCKER!!!!")
-						transMgr.DelegateOrder(order,id)
-						delete(transMgr.delegation[order])
+						transMgr.DelegateOrder(order,lowestCostId)
+						transMgr.delegation[order] = nil
 					}
 				} else{
 					fmt.Printf("transMgr: got multiple cost on order %+v from %d. oldCost = %d, newCost got = %d\n",order, id, oldCost, newCost)
 				}
 			case message.DELEGATE_ORDER:
-				//lagre hvem som skal ta alle ordre og hvem som har delegert
+				fmt.Printf("transMgr: DELEGATE_ORDER (%+v) from %d to %d\n", receivedData.Button, receivedData.Source, receivedData.ElevatorId)
 			case message.REMOVE_ORDER:
 				if receivedData.Source != transMgr.myId{
 					fmt.Printf("transMgr: Received REMOVE_ORDER: %+v\n",receivedData)
 					transMgr.Receive <- receivedData
 				}
 			default:
-				fmt.Printf("transactionmanager received unhandled type %+v. Received: %+v\n",reflect.TypeOf(receivedData) , receivedData)
+				fmt.Printf("transMgr: received unhandled MessageId \n",receivedData.MessageId)
 			}
 		}		
 		
@@ -122,8 +129,8 @@ func (transMgr *transactionMgr_t) RemoveElevator(id int){
 }
 
 func (transMgr *transactionMgr_t) DelegateOrder(order Button_t, id int){
-	transMgr.netSend <- message.Message_t{Source: transMgr.myId, MessageId: message.DELEGATE_ORDER, Button: order}
-	fmt.Println("should now DelegateOrder like a PRO!")
+	transMgr.netSend <- message.Message_t{Source: transMgr.myId, MessageId: message.DELEGATE_ORDER, Button: order, ElevatorId: id}
+	fmt.Printf("transMgr: Delegate order (%+v) to id %d\n", order, id)
 }
 
 func  (transMgr *transactionMgr_t) RequestOrder(order Button_t, cost int){
