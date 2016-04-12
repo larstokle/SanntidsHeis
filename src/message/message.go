@@ -8,6 +8,7 @@ import(
 const(
 	HEARTBEAT = iota
 	NEW_ORDER
+	REMOVE_ORDER
 	REQUEST_ORDER
 	DELEGATE_ORDER
 	COST
@@ -19,6 +20,7 @@ type Message_t struct {
 	ElevatorId int
 	MessageId int
 	Button Button_t
+	Cost int
 	Time time.Time
 	Data []byte
 }

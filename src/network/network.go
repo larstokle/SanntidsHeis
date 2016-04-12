@@ -119,7 +119,7 @@ func GetLastIPByte() int{
 	}
 	
 	lastByte := addr[dot:backslash]
-	num,err := strconv.Atoi(lastByte)
+	num,err := strconv.Atoi(lastByte)//krasjer uten nett!!!!
 	
 	if !checkAndPrintError(err, "strconv error in GetLastIPByte") {
 		return num

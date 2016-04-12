@@ -24,6 +24,7 @@ func Start(){
 			case floorDone := <-localElev.OrderDone:
 				fmt.Printf("elevMgr: floorDone from fsm = %+v\n", floorDone)
 				que.RemoveOrdersOnFloor(floorDone)
+				transMgr.RemoveOrder(floorDone)
 				newOrder := que.EarliestNonAssignedOrder() // switch with calculate from twoelevtest
 				cost := localElev.GetCost(newOrder)
 				transMgr.RequestOrder(newOrder, cost)
@@ -65,7 +66,19 @@ func Start(){
 						cost := localElev.GetCost(newOrder)
 						transMgr.RequestOrder(newOrder, cost)
 					}
+				case message.REMOVE_ORDER:
+					toRemove := newMsg.Button
+					toRemove.ButtonType = UP
+					que.RemoveOrder(toRemove)
+					toRemove.ButtonType = DOWN
+					que.RemoveOrder(toRemove)
 
+				case message.REQUEST_ORDER:
+					order := newMsg.Button
+					cost := localElev.GetCost(order)
+					transMgr.Cost(order, cost)
+				default:
+					fmt.Printf("Unhandeled MessageId: %+v",newMsg)
 				}				
 			}
 		}
