@@ -44,8 +44,8 @@ func New() *transactionMgr_t{
 				beat := Heartbeat_t{Id: receivedData.Source}
 				transMgr.NewHeartBeat(beat)
 			case message.NEW_ORDER: //new event
-				fmt.Printf("transMgr Received NEW_ORDER: %+v",receivedData)
 				if receivedData.Source != transMgr.myId{
+					fmt.Printf("transMgr Received NEW_ORDER: %+v\n",receivedData)
 					transMgr.Receive <- receivedData
 				}
 			case message.REQUEST_ORDER:
@@ -102,4 +102,9 @@ func  (transMgr *transactionMgr_t) RequestOrder(order Button_t, cost int){
 
 func (transMgr *transactionMgr_t) MyId() int{
 	return transMgr.myId
+}
+
+func (transMgr *transactionMgr_t) NewOrder(order Button_t){
+	fmt.Printf("transMgr: sending new order on network = %+v\n", order)
+	transMgr.netSend <- message.Message_t{Source: transMgr.myId, MessageId: message.NEW_ORDER, Button: order}
 }

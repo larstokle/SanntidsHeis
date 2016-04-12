@@ -19,11 +19,9 @@ func CheckButtons() chan Button_t{
 			if pressed != lastButtonState[floor][button] {
 				lastButtonState[floor][button] = pressed
 				if pressed {
-					fmt.Println("button pressed!")
-					var newEvent Button_t //tungvint! lag oneliner!!
-					newEvent.Floor = floor
-					newEvent.ButtonType = button
-					event <- newEvent
+					newButtonPressed := Button_t{Floor: floor, ButtonType: button} //tungvint! lag oneliner!!
+					fmt.Printf("eventMgr: button %+v pressed!\n", newButtonPressed)
+					event <- newButtonPressed
 				}
 			}
 

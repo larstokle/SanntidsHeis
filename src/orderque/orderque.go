@@ -29,6 +29,8 @@ func NewOrderQue()orderQue_t{
 }
 
 func (que *orderQue_t) AddOrder(button Button_t) {
+	fmt.Printf("que: AddOrder = %+v\n",button)
+
 	if !que.HasOrder(button) {
 		que[button.Floor][button.ButtonType].hasOrder = true
 		que[button.Floor][button.ButtonType].lastChangeTime = time.Now()
@@ -38,6 +40,7 @@ func (que *orderQue_t) AddOrder(button Button_t) {
 }
 
 func (que *orderQue_t) RemoveOrder(button Button_t) {
+	//fmt.Printf("que: RemoveOrder = %+v\n",button)
 	if que.HasOrder(button) {
 		que[button.Floor][button.ButtonType].hasOrder = false
 		que[button.Floor][button.ButtonType].lastChangeTime = time.Now()
@@ -47,6 +50,7 @@ func (que *orderQue_t) RemoveOrder(button Button_t) {
 }
 
 func (que *orderQue_t) RemoveOrdersOnFloor(floor int){
+	fmt.Printf("que: RemoveOrdersOnFloor = %+v\n",floor)
 	for orderType := 0; orderType < N_BUTTON_TYPES; orderType++ {
 		order := Button_t{Floor: floor, ButtonType: orderType}
 		que.RemoveOrder(order)
@@ -54,23 +58,27 @@ func (que *orderQue_t) RemoveOrdersOnFloor(floor int){
 }
 
 func (que *orderQue_t) UnassignOrderToID(id int){
+	fmt.Printf("que: UnassignOrderToId = %d\n",id)
 	for floor := FIRST_FLOOR; floor < N_FLOORS; floor++ {
 		for orderType := 0; orderType < N_BUTTON_TYPES; orderType++ {
 			if que[floor][orderType].assignedToID == id{
 				que[floor][orderType].assignedToID = UNASIGNED_ID
+				fmt.Printf("que: Unassigned order: floor = %d, orderType = %d", floor, orderType)
 			}
 		}
 	}
 }
 
 func (que *orderQue_t) AssignOrderToId(button Button_t, id int) bool{
+	fmt.Printf("que: AssignOrder = %+v, ToId = %d\n",button,id)
 	if !que.HasOrder(button){
 		return false
 	}
 
 	que.UnassignOrderToID(id)
-
 	que[button.Floor][button.ButtonType].assignedToID = id
+
+	fmt.Printf("que: AssignOrder done\n")
 	return true
 }
 
@@ -99,7 +107,9 @@ func (thisQue *orderQue_t) Sync(queToSync orderQue_t) orderQue_t { //add error r
 }
 
 func (que *orderQue_t) HasOrder(button Button_t) bool {
-	return que[button.Floor][button.ButtonType].hasOrder
+	hasOrder := que[button.Floor][button.ButtonType].hasOrder
+	//fmt.Printf("que: HasOrder %+v? %t\n", button, hasOrder)
+	return hasOrder
 }
 
 func (que *orderQue_t) IsEmpty() bool {
@@ -135,15 +145,22 @@ func (que *orderQue_t) EarliestNonAssignedOrder() Button_t {
 	return earliestOrder
 }
 
-func (que *orderQue_t) NextOrderOfTypeInDir(currentFloor int, dir int, orderType int) int {
-	if dir == DIR_STOP {
-		dir = DIR_UP //kanskje noe annet her?
-	}
-	for checkFloor := currentFloor; checkFloor >= FIRST_FLOOR && checkFloor <= TOP_FLOOR; checkFloor += dir {
-		if que[checkFloor][orderType].hasOrder {
-			return checkFloor
+func (que *orderQue_t) NearestOrderOfTypeInDir(currentFloor int, dir int, orderType int) int {
+	switch dir{
+	case DIR_UP, DIR_STOP:
+		for checkFloor := currentFloor; checkFloor <= TOP_FLOOR; checkFloor++ {
+			if que[checkFloor][orderType].hasOrder {
+				return checkFloor
+			}
+		}
+	case DIR_DOWN:
+		for checkFloor := currentFloor; checkFloor >= FIRST_FLOOR; checkFloor-- {
+			if que[checkFloor][orderType].hasOrder {
+				return checkFloor
+			}
 		}
 	}
+	
 	return -1
 }
 

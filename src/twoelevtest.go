@@ -37,7 +37,7 @@ func main() {
 			// que.AddOrder(newEvent.Floor, newEvent.EventType)
 			// dir := elevatorData.GetDir()
 			// closest := int(math.Min(float64(newEvent.Floor*dir), float64(elevatorData.GetDestination()*dir))) * dir
-			// if dir == fsm.CalculateDir(newEvent.Floor, elevatorData.GetFloor()) && closest != elevatorData.GetDestination() && (dir == DIR_UP && newEvent.EventType == UP || dir == DIR_DOWN && newEvent.EventType == DOWN || newEvent.EventType == CMD) {
+			// if dir == fsm.calculateDir(newEvent.Floor, elevatorData.GetFloor()) && closest != elevatorData.GetDestination() && (dir == DIR_UP && newEvent.EventType == UP || dir == DIR_DOWN && newEvent.EventType == DOWN || newEvent.EventType == CMD) {
 			// 	elevatorData.NewDestination(newEvent.Floor)
 			// }
 		case newUnknownTrans := <-fromTrans:
@@ -47,7 +47,7 @@ func main() {
 				que.AddOrder(newTrans.Floor, newTrans.EventType)
 				dir := elevatorData.GetDir()
 				closest := int(math.Min(float64(newTrans.Floor*dir), float64(elevatorData.GetDestination()*dir))) * dir
-				if dir == fsm.CalculateDir(newTrans.Floor, elevatorData.GetFloor()) && closest != elevatorData.GetDestination() && (dir == DIR_UP && newTrans.EventType == UP || dir == DIR_DOWN && newTrans.EventType == DOWN || newTrans.EventType == CMD) {
+				if dir == fsm.calculateDir(newTrans.Floor, elevatorData.GetFloor()) && closest != elevatorData.GetDestination() && (dir == DIR_UP && newTrans.EventType == UP || dir == DIR_DOWN && newTrans.EventType == DOWN || newTrans.EventType == CMD) {
 					elevatorData.NewDestination(newTrans.Floor)
 				}
 			default:
@@ -79,19 +79,19 @@ func main() {
 }
 
 func calculateNewDestination(que orderque.OrderQue_t, elevator fsm.ElevatorState) int {
-	newCMDDestination := que.NextOrderOfTypeInDir(elevator.GetFloor(), elevator.GetDir(), CMD)
+	newCMDDestination := que.NearestOrderOfTypeInDir(elevator.GetFloor(), elevator.GetDir(), CMD)
 	if newCMDDestination != -1 {
 		fmt.Printf("CMD Destination in same dir as before = %+v\n", newCMDDestination)
 		return newCMDDestination
 	}
 
 	newEarliestDestination := que.EarliestNonAssignedOrder().GetFloor()
-	dir := fsm.CalculateDir(newEarliestDestination, elevator.GetFloor())
+	dir := fsm.calculateDir(newEarliestDestination, elevator.GetFloor())
 	fmt.Printf("EarliestOrderInside = %+v\n", newEarliestDestination)
 
 	if dir != elevator.GetDir() {
 		fmt.Println("Change of dir")
-		newCMDDestination = que.NextOrderOfTypeInDir(elevator.GetFloor(), dir, CMD)
+		newCMDDestination = que.NearestOrderOfTypeInDir(elevator.GetFloor(), dir, CMD)
 	}
 	fmt.Printf("CMD Destination = %+v\n", newCMDDestination)
 
@@ -101,7 +101,7 @@ func calculateNewDestination(que orderque.OrderQue_t, elevator fsm.ElevatorState
 	} else if dir == DIR_DOWN {
 		btn = DOWN
 	}
-	newBTNDestination := que.NextOrderOfTypeInDir(elevator.GetFloor(), dir, btn)
+	newBTNDestination := que.NearestOrderOfTypeInDir(elevator.GetFloor(), dir, btn)
 	fmt.Printf("BTN Destination = %+v\n", newBTNDestination)
 
 	newDestination := newEarliestDestination
