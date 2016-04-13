@@ -1,0 +1,28 @@
+WARNING: DATA RACE
+Write by goroutine 15:
+  runtime.mapdelete()
+      /tmp/workdir/go/src/runtime/hashmap.go:511 +0x0
+  transactionMgr.(*transactionMgr_t).RemoveElevator()
+      /home/student/SanntidsHeis/src/transactionMgr/transactionMgr.go:159 +0x78
+  transactionMgr.(*transactionMgr_t).NewHeartBeat.func1()
+      /home/student/SanntidsHeis/src/transactionMgr/transactionMgr.go:153 +0x3e
+
+Previous read by goroutine 13:
+  runtime.mapaccess2_fast64()
+      /tmp/workdir/go/src/runtime/hashmap_fast.go:137 +0x0
+  transactionMgr.(*transactionMgr_t).NewHeartBeat()
+      /home/student/SanntidsHeis/src/transactionMgr/transactionMgr.go:150 +0x7f
+  transactionMgr.New.func1()
+      /home/student/SanntidsHeis/src/transactionMgr/transactionMgr.go:51 +0xf6
+
+Goroutine 15 (running) created at:
+  time.goFunc()
+      /tmp/workdir/go/src/time/sleep.go:129 +0x6d
+
+Goroutine 13 (running) created at:
+  transactionMgr.New()
+      /home/student/SanntidsHeis/src/transactionMgr/transactionMgr.go:134 +0x278
+  _/home/student/SanntidsHeis/src/elevatorMgr.Start()
+      /home/student/SanntidsHeis/src/elevatorMgr/elevatorMgr.go:18 +0xcf
+  main.main()
+      /home/student/SanntidsHeis/src/testmain.go:9 +0x25

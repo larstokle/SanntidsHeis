@@ -1,0 +1,36 @@
+
+
+prøvde å legge til atomic på elev.fsmState
+
+WARNING: DATA RACE
+Read by goroutine 7:
+  fsm.(*ElevatorState).goToStateDoorOpen()
+      /home/student/SanntidsHeis/src/fsm/fsm.go:110 +0x13e
+  fsm.(*ElevatorState).destinationReaced()
+      /home/student/SanntidsHeis/src/fsm/fsm.go:94 +0x120
+  fsm.(*ElevatorState).NewFloorReached()
+      /home/student/SanntidsHeis/src/fsm/fsm.go:103 +0x19f
+  fsm.NewElevator.func1()
+      /home/student/SanntidsHeis/src/fsm/fsm.go:57 +0x65
+
+Previous write by goroutine 14:
+  fsm.(*ElevatorState).goToStateMoving()
+      /home/student/SanntidsHeis/src/fsm/fsm.go:149 +0x1e8
+  fsm.(*ElevatorState).NewDestination()
+      /home/student/SanntidsHeis/src/fsm/fsm.go:87 +0x1d4
+  _/home/student/SanntidsHeis/src/elevatorMgr.Start.func1()
+      /home/student/SanntidsHeis/src/elevatorMgr/elevatorMgr.go:53 +0x957
+
+Goroutine 7 (running) created at:
+  fsm.NewElevator()
+      /home/student/SanntidsHeis/src/fsm/fsm.go:60 +0x15d
+  _/home/student/SanntidsHeis/src/elevatorMgr.Start()
+      /home/student/SanntidsHeis/src/elevatorMgr/elevatorMgr.go:15 +0xad
+  main.main()
+      /home/student/SanntidsHeis/src/testmain.go:9 +0x25
+
+Goroutine 14 (running) created at:
+  _/home/student/SanntidsHeis/src/elevatorMgr.Start()
+      /home/student/SanntidsHeis/src/elevatorMgr/elevatorMgr.go:115 +0x117
+  main.main()
+      /home/student/SanntidsHeis/src/testmain.go:9 +0x25
