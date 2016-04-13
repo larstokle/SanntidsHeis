@@ -2,10 +2,11 @@ package fsm
 
 import (
 	"driver"
-	"time"
-	"fmt"
 	"eventmgr"
-	."globals"
+	"fmt"
+	. "globals"
+	"sync/atomic"
+	"time"
 )
 
 type State int
@@ -22,7 +23,6 @@ var states = [...]string{
 	"STATE_DOOR_OPEN",
 }
 
-
 const NO_DESTINATION = -1
 const INF_COST = 255
 
@@ -35,8 +35,8 @@ type ElevatorState struct {
 	floor       int
 	dir         Direction_t
 	destination int
-	OrderDone chan int
-	doorTimer *time.Timer
+	OrderDone   chan int
+	doorTimer   *time.Timer
 }
 
 func NewElevator() *ElevatorState {
@@ -44,28 +44,32 @@ func NewElevator() *ElevatorState {
 	var elev ElevatorState
 	elev.destination = NO_DESTINATION
 	elev.OrderDone = make(chan int, 1)
-	floorEvent  := eventmgr.CheckFloorSignal()
+	floorEvent := eventmgr.CheckFloorSignal()
 	driver.RunDown()
 	elev.NewFloorReached(<-floorEvent)
 	driver.RunStop()
 
 	elev.goToStateIdle()
 
-	go func(){
+	go func() {
 		for {
-			newFloor := <- floorEvent
+			newFloor := <-floorEvent
 			elev.NewFloorReached(newFloor)
-			
+
 		}
 	}()
-
 
 	return &elev
 }
 
 func (elev *ElevatorState) State() State {
-	return elev.fsmState
+	return atomic.LoadInt32(&(elev.fsmState))
 }
+
+func (elev *ElevatorState) setState(value State) {
+	atomic.StoreInt32(&(elev.fsmState), value)
+}
+
 func (elev ElevatorState) Floor() int {
 	return elev.floor
 }
@@ -76,24 +80,21 @@ func (elev ElevatorState) Destination() int {
 	return elev.destination
 }
 
-
-
 func (elev *ElevatorState) NewDestination(destination int) {
 	fmt.Printf("fsm: new destination = %d\n", destination)
 	elev.destination = destination
-	if destination == elev.floor {//&& elev.fsmState != STATE_DOOR_OPEN{ //forslag til nytt: reset the afterfunc timer in goToStateDoorOpen() if STATE_DOOR_OPEN
+	if destination == elev.floor { //&& elev.fsmState != STATE_DOOR_OPEN{ //forslag til nytt: reset the afterfunc timer in goToStateDoorOpen() if STATE_DOOR_OPEN
 		elev.destinationReaced()
-	} else if elev.fsmState == STATE_IDLE{
+	} else if elev.State() == STATE_IDLE {
 		elev.goToStateMoving(calculateDir(destination, elev.floor))
 	}
 }
 
-func (elev *ElevatorState) destinationReaced(){
+func (elev *ElevatorState) destinationReaced() {
 	fmt.Println("fsm: Destination reached")
 	elev.destination = NO_DESTINATION
 	elev.goToStateDoorOpen()
 }
-
 
 func (elev *ElevatorState) NewFloorReached(newFloor int) {
 	fmt.Printf("fsm: New floor reached= %d\n", newFloor)
@@ -105,38 +106,37 @@ func (elev *ElevatorState) NewFloorReached(newFloor int) {
 }
 
 func (elev *ElevatorState) goToStateDoorOpen() {
-	fmt.Printf("fsm: Door Opening in floor = %d\n",elev.floor)
+	fmt.Printf("fsm: Door Opening in floor = %d\n", elev.floor)
 
-	if elev.fsmState == STATE_DOOR_OPEN{
+	if elev.State() == STATE_DOOR_OPEN {
 		fmt.Println("fsm: Door alredy open")
-		elev.doorTimer.Reset(time.Second*3)
+		elev.doorTimer.Reset(time.Second * 3)
 		elev.OrderDone <- elev.floor
 		return
 	}
 
 	driver.RunStop()
-	elev.fsmState = STATE_DOOR_OPEN
+	elev.setState(STATE_DOOR_OPEN)
 	elev.OrderDone <- elev.floor
 	driver.SetDoorOpen(true)
 
 	doorClose := func() {
 		fmt.Printf("fsm: Door closing\n")
 		driver.SetDoorOpen(false)
-		if elev.destination == NO_DESTINATION{
+		if elev.destination == NO_DESTINATION {
 			elev.goToStateIdle()
 		} else {
 			elev.goToStateMoving(calculateDir(elev.destination, elev.floor))
 		}
 	}
-	 
+
 	elev.doorTimer = time.AfterFunc(time.Second*3, doorClose)
-	
-	
+
 }
 
 func (elev *ElevatorState) goToStateMoving(direction Direction_t) {
 	fmt.Printf("fsm: Starting to move in dir = %d against destination = %d\n", direction, elev.destination)
-	switch direction{
+	switch direction {
 	case DIR_UP:
 		driver.RunUp()
 	case DIR_DOWN:
@@ -146,54 +146,50 @@ func (elev *ElevatorState) goToStateMoving(direction Direction_t) {
 		return
 	}
 	elev.dir = direction
-	elev.fsmState = STATE_MOVING
-	
-	
+	elev.setState(STATE_MOVING)
+
 }
 
 func (elev *ElevatorState) goToStateIdle() {
 	fmt.Println("fsm: Going idle in floor = ", elev.floor)
 	driver.RunStop()
-	elev.fsmState = STATE_IDLE
+	elev.setState(STATE_IDLE)
 }
 
-func (elev *ElevatorState) NeedNewDestination() bool{
+func (elev *ElevatorState) NeedNewDestination() bool {
 	return elev.destination == NO_DESTINATION
 }
 
-func (elev *ElevatorState) GetCost(order Button_t) int{
-	newDistance := distance(order.Floor,elev.floor)
+func (elev *ElevatorState) GetCost(order Button_t) int {
+	newDistance := distance(order.Floor, elev.floor)
 
-	if elev.destination == NO_DESTINATION{
-		return newDistance 
+	if elev.destination == NO_DESTINATION {
+		return newDistance
 	}
 
-
 	currentDistance := distance(elev.destination, elev.floor)
-	
+
 	directionToOrder := calculateDir(order.Floor, elev.floor)
 	orderIsInSameDir := directionToOrder == elev.dir || elev.dir == DIR_STOP
 
-	if newDistance > currentDistance || !orderIsInSameDir{
+	if newDistance > currentDistance || !orderIsInSameDir {
 		return INF_COST
 	}
 
-	
 	buttonDir := buttonTypeToDirection(order.ButtonType)
 
-	if order.ButtonType == CMD{
+	if order.ButtonType == CMD {
 		return newDistance
-	} else if buttonDir == elev.dir || elev.destination == order.Floor{
+	} else if buttonDir == elev.dir || elev.destination == order.Floor {
 		return newDistance + N_FLOORS
-	}else{
-		fmt.Printf("fsm: Unhandlet GetCost! ELevator = %+v, order to get cost for = %+v\n",*elev, order)
+	} else {
+		fmt.Printf("fsm: Unhandlet GetCost! ELevator = %+v, order to get cost for = %+v\n", *elev, order)
 		return INF_COST
 	}
 }
 
-
-func buttonTypeToDirection(buttonType int) Direction_t{
-	switch buttonType{
+func buttonTypeToDirection(buttonType int) Direction_t {
+	switch buttonType {
 	case UP:
 		return DIR_UP
 	case DOWN:
@@ -202,4 +198,3 @@ func buttonTypeToDirection(buttonType int) Direction_t{
 		return DIR_STOP
 	}
 }
-
