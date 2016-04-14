@@ -20,8 +20,9 @@ func CheckButtons() chan Button_t{
 				lastButtonState[floor][button] = pressed
 				if pressed {
 					newButtonPressed := Button_t{Floor: floor, ButtonType: button} //tungvint! lag oneliner!!
-					fmt.Printf("eventMgr: button %+v pressed!\n", newButtonPressed)
+					fmt.Printf("eventMgr: button %+v pressed! Could hang...\n", newButtonPressed)
 					event <- newButtonPressed
+					if(DEBUG_CHANNELS){fmt.Println("eventMgr: button didn't hang")}
 				}
 			}
 
@@ -42,7 +43,7 @@ func CheckButtons() chan Button_t{
 }
 
 func CheckFloorSignal() chan int{
-	event := make(chan int)
+	event := make(chan int)  
 	lastFloorState := -1
 	fmt.Println("eventmgr: CheckFloorSignal started\n")
 	go func(){
@@ -51,7 +52,9 @@ func CheckFloorSignal() chan int{
 			if newFloorState != lastFloorState {
 				lastFloorState = newFloorState
 				if newFloorState != -1 {
+					if(DEBUG_CHANNELS){fmt.Println("eventMgr: newFloorState could hang...")}
 					event <- newFloorState
+					if(DEBUG_CHANNELS){fmt.Println("eventMgr: newFloorState didn't hang")}
 				}
 			}
 			time.Sleep(time.Millisecond * 20)

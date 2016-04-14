@@ -5,6 +5,7 @@ import (
 	"driver"
 	"fmt"
 	"time"
+	"orderLog"
 )
 
 const UNASIGNED_ID = NONLEGAL_ID
@@ -25,46 +26,52 @@ func NewOrderQue()orderQue_t{
 			que[floor][orderType].lastChangeTime = startTime
 		}
 	}
-	fmt.Println("que: init done NewOrderQue returned\n")
+	que.syncWithInternalLog()
+	if(DEBUG_QUE){fmt.Println("que: init done NewOrderQue returned\n")}
 	return que
 }
 
 func (que *orderQue_t) AddOrder(button Button_t) {
-	fmt.Printf("que: AddOrder = %+v\n",button)
-
+	if(DEBUG_QUE){fmt.Printf("que: AddOrder = %+v\n",button)}
 	if !que.HasOrder(button) {
 		que[button.Floor][button.ButtonType].hasOrder = true
 		que[button.Floor][button.ButtonType].lastChangeTime = time.Now()
 		que[button.Floor][button.ButtonType].assignedToID = UNASIGNED_ID
 		driver.SetButtonLight(button.ButtonType, button.Floor, true)
 	}
+	que.logInternal()
+
 }
 
 func (que *orderQue_t) RemoveOrder(button Button_t) {
-	fmt.Printf("que: RemoveOrder = %+v\n",button)
+	if(DEBUG_QUE){fmt.Printf("que: RemoveOrder = %+v\n",button)}
 	if que.HasOrder(button) {
 		que[button.Floor][button.ButtonType].hasOrder = false
 		que[button.Floor][button.ButtonType].lastChangeTime = time.Now()
 		que[button.Floor][button.ButtonType].assignedToID = UNASIGNED_ID
 		driver.SetButtonLight(button.ButtonType, button.Floor, false)
 	}
+	que.logInternal()
+
 }
 
 func (que *orderQue_t) RemoveOrdersOnFloor(floor int){
-	fmt.Printf("que: RemoveOrdersOnFloor = %+v\n",floor)
+	if(DEBUG_QUE){fmt.Printf("que: RemoveOrdersOnFloor = %+v\n",floor)}
 	for orderType := 0; orderType < N_BUTTON_TYPES; orderType++ {
 		order := Button_t{Floor: floor, ButtonType: orderType}
 		que.RemoveOrder(order)
 	}
+	if(DEBUG_QUE){fmt.Printf("Remaining orders: \n")}
+	que.Print()
 }
 
 func (que *orderQue_t) UnassignOrderToID(id int){
-	fmt.Printf("que: UnassignOrderToId = %d\n",id)
+	if(DEBUG_QUE){fmt.Printf("que: UnassignOrderToId = %d\n",id)}
 	for floor := FIRST_FLOOR; floor < N_FLOORS; floor++ {
 		for orderType := 0; orderType < N_BUTTON_TYPES; orderType++ {
 			if que[floor][orderType].assignedToID == id{
 				que[floor][orderType].assignedToID = UNASIGNED_ID
-				fmt.Printf("que: Unassigned order: floor = %d, orderType = %d", floor, orderType)
+				if(DEBUG_QUE){fmt.Printf("que: Unassigned order: floor = %d, orderType = %d", floor, orderType)}
 			}
 		}
 	}
@@ -76,7 +83,7 @@ func (que *orderQue_t) AssignOrderToId(button Button_t, id int) bool{
 	}
 
 	que.UnassignOrderToID(id)
-	fmt.Printf("que: AssignOrder = %+v, ToId = %d\n",button,id)
+	if(DEBUG_QUE){fmt.Printf("que: AssignOrder = %+v, ToId = %d\n",button,id)}
 	que[button.Floor][button.ButtonType].assignedToID = id
 
 	return true
@@ -108,7 +115,7 @@ func (thisQue *orderQue_t) Sync(queToSync orderQue_t) orderQue_t { //add error r
 
 func (que *orderQue_t) HasOrder(button Button_t) bool {
 	hasOrder := que[button.Floor][button.ButtonType].hasOrder
-	//fmt.Printf("que: HasOrder %+v? %t\n", button, hasOrder)
+	//if(DEBUG_QUE){fmt.Printf("que: HasOrder %+v? %t\n", button, hasOrder)}
 	return hasOrder
 }
 
@@ -165,12 +172,39 @@ func (que *orderQue_t) NearestOrderOfTypeInDir(currentFloor int, dir int, orderT
 }
 
 func (que *orderQue_t) Print() {
-	fmt.Println("orderQue_t:")
-	for orderType := 0; orderType < N_BUTTON_TYPES; orderType++ {
-		fmt.Printf("\tordertype: %d\n", orderType)
-		for floor := FIRST_FLOOR; floor <= TOP_FLOOR; floor++ {
-			fmt.Printf("\t\tFloor %d: has order = %t,last Changed: = %v\n", floor, que[floor][orderType].hasOrder, que[floor][orderType].lastChangeTime)
+	if(DEBUG_QUE){fmt.Println("orderQue_t:")}
+	for floor := FIRST_FLOOR; floor <= TOP_FLOOR; floor++ {
+		if(DEBUG_QUE){fmt.Printf("\tFloor: %d\n", floor)}
+		for orderType := 0; orderType < N_BUTTON_TYPES; orderType++ {
+			if(DEBUG_QUE){fmt.Printf("\t\t type: %d: has order = %t,last Changed: = %v\n", orderType, que[floor][orderType].hasOrder, que[floor][orderType].lastChangeTime)}
 		}
 	}
-	fmt.Println()
+	if(DEBUG_QUE){fmt.Println()}
+}
+
+
+func (que *orderQue_t) logInternal(){
+	internalOrders := make([]byte, N_FLOORS)
+	
+	for floor := FIRST_FLOOR; floor <= TOP_FLOOR; floor++ {
+		if(que[floor][CMD].hasOrder){
+			internalOrders[floor] = '1'
+		} else{
+			internalOrders[floor] = '0'
+		}
+
+	}
+	orderLog.WriteInternalOrders(internalOrders)
+}
+
+
+func (que *orderQue_t) syncWithInternalLog(){
+	internalOrders := orderLog.FindInternalOrders()
+	for floor := FIRST_FLOOR; floor <= TOP_FLOOR; floor++ {
+		if(internalOrders[floor] == '1'){
+			que[floor][CMD].hasOrder = true
+		} else {
+			que[floor][CMD].hasOrder = false
+		}
+	}
 }

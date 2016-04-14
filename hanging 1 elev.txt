@@ -1,0 +1,192 @@
+=========================== ELEVATOR STARTUP ===========================
+
+que: init done NewOrderQue returned
+
+eventmgr: CheckFloorSignal started
+
+fsm: New floor reached= 0
+fsm: Going idle in floor =  0
+fsm: init done NewElevator returned
+
+eventmgr: CheckButtons started
+
+transMgr: init done entering loop
+elevMgr: init done entering loop
+
+=========================== ELEVATOR STARTED ===========================
+
+
+
+===Got New Heartbeat ID: {Id:24}, now have 1 elevs===
+Nothing is happening... 
+eventMgr: button {Floor:2, Type: Down} pressed!
+elevMgr: newBtn from eventmgr = {Floor:2, Type: Down}
+que: AddOrder = {Floor:2, Type: Down}
+transMgr: did not send new order ({Floor:2, Type: Down}) since numElevs = 1 
+transMgr: RequestOrder on {Floor:2, Type: Down} with cost 2, but no other elevs
+que: UnassignOrderToId = 24
+que: AssignOrder = {Floor:2, Type: Down}, ToId = 24
+fsm: new destination = 2
+fsm: Starting to move in dir = 1 against destination = 2
+
+
+eventMgr: button {Floor:1, Type: Up} pressed!
+elevMgr: newBtn from eventmgr = {Floor:1, Type: Up}
+que: AddOrder = {Floor:1, Type: Up}
+transMgr: did not send new order ({Floor:1, Type: Up}) since numElevs = 1 
+transMgr: RequestOrder on {Floor:1, Type: Up} with cost 5, but no other elevs
+que: UnassignOrderToId = 24
+que: Unassigned order: floor = 2, orderType = 1que: AssignOrder = {Floor:1, Type: Up}, ToId = 24
+fsm: new destination = 1
+fsm: New floor reached= 1
+fsm: Destination reached
+fsm: Door Opening in floor = 1
+elevMgr: floorDone from fsm = 1
+que: RemoveOrdersOnFloor = 1
+que: RemoveOrder = {Floor:1, Type: Up}
+que: RemoveOrder = {Floor:1, Type: Down}
+que: RemoveOrder = {Floor:1, Type: Command}
+Remaining orders: 
+orderQue_t:
+	Floor: 0
+		 type: 0: has order = false,last Changed: = 2016-04-14 09:39:32.970743379 +0200 CEST
+		 type: 1: has order = false,last Changed: = 2016-04-14 09:39:32.970743379 +0200 CEST
+		 type: 2: has order = false,last Changed: = 2016-04-14 09:39:32.970743379 +0200 CEST
+	Floor: 1
+		 type: 0: has order = false,last Changed: = 2016-04-14 09:39:39.276691641 +0200 CEST
+		 type: 1: has order = false,last Changed: = 2016-04-14 09:39:32.970743379 +0200 CEST
+		 type: 2: has order = false,last Changed: = 2016-04-14 09:39:32.970743379 +0200 CEST
+	Floor: 2
+		 type: 0: has order = false,last Changed: = 2016-04-14 09:39:32.970743379 +0200 CEST
+		 type: 1: has order = true,last Changed: = 2016-04-14 09:39:37.025973911 +0200 CEST
+		 type: 2: has order = false,last Changed: = 2016-04-14 09:39:32.970743379 +0200 CEST
+	Floor: 3
+		 type: 0: has order = false,last Changed: = 2016-04-14 09:39:32.970743379 +0200 CEST
+		 type: 1: has order = false,last Changed: = 2016-04-14 09:39:32.970743379 +0200 CEST
+		 type: 2: has order = false,last Changed: = 2016-04-14 09:39:32.970743379 +0200 CEST
+
+transMgr: sending remove order (floor) on network = 1
+transMgr: RequestOrder on {Floor:2, Type: Down} with cost 1, but no other elevs
+eventMgr: button {Floor:1, Type: Up} pressed!
+elevMgr: newBtn from eventmgr = {Floor:1, Type: Up}
+que: AddOrder = {Floor:1, Type: Up}
+transMgr: did not send new order ({Floor:1, Type: Up}) since numElevs = 1 
+transMgr: RequestOrder on {Floor:1, Type: Up} with cost 0, but no other elevs
+que: UnassignOrderToId = 24
+que: AssignOrder = {Floor:1, Type: Up}, ToId = 24
+fsm: new destination = 1
+fsm: Destination reached
+fsm: Door Opening in floor = 1
+fsm: Door alredy open
+elevMgr: floorDone from fsm = 1
+que: RemoveOrdersOnFloor = 1
+que: RemoveOrder = {Floor:1, Type: Up}
+que: RemoveOrder = {Floor:1, Type: Down}
+que: RemoveOrder = {Floor:1, Type: Command}
+Remaining orders: 
+orderQue_t:
+	Floor: 0
+		 type: 0: has order = false,last Changed: = 2016-04-14 09:39:32.970743379 +0200 CEST
+		 type: 1: has order = false,last Changed: = 2016-04-14 09:39:32.970743379 +0200 CEST
+		 type: 2: has order = false,last Changed: = 2016-04-14 09:39:32.970743379 +0200 CEST
+	Floor: 1
+		 type: 0: has order = false,last Changed: = 2016-04-14 09:39:41.650204095 +0200 CEST
+		 type: 1: has order = false,last Changed: = 2016-04-14 09:39:32.970743379 +0200 CEST
+		 type: 2: has order = false,last Changed: = 2016-04-14 09:39:32.970743379 +0200 CEST
+	Floor: 2
+		 type: 0: has order = false,last Changed: = 2016-04-14 09:39:32.970743379 +0200 CEST
+		 type: 1: has order = true,last Changed: = 2016-04-14 09:39:37.025973911 +0200 CEST
+		 type: 2: has order = false,last Changed: = 2016-04-14 09:39:32.970743379 +0200 CEST
+	Floor: 3
+		 type: 0: has order = false,last Changed: = 2016-04-14 09:39:32.970743379 +0200 CEST
+		 type: 1: has order = false,last Changed: = 2016-04-14 09:39:32.970743379 +0200 CEST
+		 type: 2: has order = false,last Changed: = 2016-04-14 09:39:32.970743379 +0200 CEST
+
+transMgr: sending remove order (floor) on network = 1
+transMgr: RequestOrder on {Floor:2, Type: Down} with cost 1, but no other elevs
+eventMgr: button {Floor:0, Type: Up} pressed!
+elevMgr: newBtn from eventmgr = {Floor:0, Type: Up}
+que: AddOrder = {Floor:0, Type: Up}
+transMgr: did not send new order ({Floor:0, Type: Up}) since numElevs = 1 
+transMgr: RequestOrder on {Floor:0, Type: Up} with cost 1, but no other elevs
+que: UnassignOrderToId = 24
+que: AssignOrder = {Floor:0, Type: Up}, ToId = 24
+fsm: new destination = 0
+fsm: Door closing
+fsm: Starting to move in dir = -1 against destination = 0
+
+
+fsm: New floor reached= 0
+fsm: Destination reached
+fsm: Door Opening in floor = 0
+elevMgr: floorDone from fsm = 0
+que: RemoveOrdersOnFloor = 0
+que: RemoveOrder = {Floor:0, Type: Up}
+que: RemoveOrder = {Floor:0, Type: Down}
+que: RemoveOrder = {Floor:0, Type: Command}
+Remaining orders: 
+orderQue_t:
+	Floor: 0
+		 type: 0: has order = false,last Changed: = 2016-04-14 09:39:46.901181614 +0200 CEST
+		 type: 1: has order = false,last Changed: = 2016-04-14 09:39:32.970743379 +0200 CEST
+		 type: 2: has order = false,last Changed: = 2016-04-14 09:39:32.970743379 +0200 CEST
+	Floor: 1
+		 type: 0: has order = false,last Changed: = 2016-04-14 09:39:41.650204095 +0200 CEST
+		 type: 1: has order = false,last Changed: = 2016-04-14 09:39:32.970743379 +0200 CEST
+		 type: 2: has order = false,last Changed: = 2016-04-14 09:39:32.970743379 +0200 CEST
+	Floor: 2
+		 type: 0: has order = false,last Changed: = 2016-04-14 09:39:32.970743379 +0200 CEST
+		 type: 1: has order = true,last Changed: = 2016-04-14 09:39:37.025973911 +0200 CEST
+		 type: 2: has order = false,last Changed: = 2016-04-14 09:39:32.970743379 +0200 CEST
+	Floor: 3
+		 type: 0: has order = false,last Changed: = 2016-04-14 09:39:32.970743379 +0200 CEST
+		 type: 1: has order = false,last Changed: = 2016-04-14 09:39:32.970743379 +0200 CEST
+		 type: 2: has order = false,last Changed: = 2016-04-14 09:39:32.970743379 +0200 CEST
+
+transMgr: sending remove order (floor) on network = 0
+transMgr: RequestOrder on {Floor:2, Type: Down} with cost 2, but no other elevs
+fsm: Door closing
+fsm: Going idle in floor =  0
+eventMgr: button {Floor:2, Type: Up} pressed!
+elevMgr: newBtn from eventmgr = {Floor:2, Type: Up}
+que: AddOrder = {Floor:2, Type: Up}
+transMgr: did not send new order ({Floor:2, Type: Up}) since numElevs = 1 
+transMgr: RequestOrder on {Floor:2, Type: Up} with cost 2, but no other elevs
+que: UnassignOrderToId = 24
+que: AssignOrder = {Floor:2, Type: Up}, ToId = 24
+fsm: new destination = 2
+fsm: Starting to move in dir = 1 against destination = 2
+
+
+fsm: New floor reached= 1
+fsm: New floor reached= 2
+fsm: Destination reached
+fsm: Door Opening in floor = 2
+elevMgr: floorDone from fsm = 2
+que: RemoveOrdersOnFloor = 2
+que: RemoveOrder = {Floor:2, Type: Up}
+que: RemoveOrder = {Floor:2, Type: Down}
+que: RemoveOrder = {Floor:2, Type: Command}
+Remaining orders: 
+orderQue_t:
+	Floor: 0
+		 type: 0: has order = false,last Changed: = 2016-04-14 09:39:46.901181614 +0200 CEST
+		 type: 1: has order = false,last Changed: = 2016-04-14 09:39:32.970743379 +0200 CEST
+		 type: 2: has order = false,last Changed: = 2016-04-14 09:39:32.970743379 +0200 CEST
+	Floor: 1
+		 type: 0: has order = false,last Changed: = 2016-04-14 09:39:41.650204095 +0200 CEST
+		 type: 1: has order = false,last Changed: = 2016-04-14 09:39:32.970743379 +0200 CEST
+		 type: 2: has order = false,last Changed: = 2016-04-14 09:39:32.970743379 +0200 CEST
+	Floor: 2
+		 type: 0: has order = false,last Changed: = 2016-04-14 09:40:42.771040393 +0200 CEST
+		 type: 1: has order = false,last Changed: = 2016-04-14 09:40:42.771070023 +0200 CEST
+		 type: 2: has order = false,last Changed: = 2016-04-14 09:39:32.970743379 +0200 CEST
+	Floor: 3
+		 type: 0: has order = false,last Changed: = 2016-04-14 09:39:32.970743379 +0200 CEST
+		 type: 1: has order = false,last Changed: = 2016-04-14 09:39:32.970743379 +0200 CEST
+		 type: 2: has order = false,last Changed: = 2016-04-14 09:39:32.970743379 +0200 CEST
+
+transMgr: sending remove order (floor) on network = 2
+fsm: Door closing
+fsm: Going idle in floor =  2
+
