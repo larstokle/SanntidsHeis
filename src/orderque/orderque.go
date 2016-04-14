@@ -202,7 +202,8 @@ func (que *orderQue_t) syncWithInternalLog(){
 	internalOrders := orderLog.FindInternalOrders()
 	for floor := FIRST_FLOOR; floor <= TOP_FLOOR; floor++ {
 		if(internalOrders[floor] == '1'){
-			que[floor][CMD].hasOrder = true
+			order := Button_t{Floor: floor, ButtonType: CMD}
+			que.AddOrder(order)
 		} else {
 			que[floor][CMD].hasOrder = false
 		}

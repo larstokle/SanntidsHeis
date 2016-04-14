@@ -59,7 +59,7 @@ var NONVALID_BUTTON = Button_t{FIRST_FLOOR, DOWN}
 var DEBUG_TRNSMGR bool = true
 var DEBUG_ELEVMGR bool = true
 var DEBUG_FSM bool = true
-var DEBUG_QUE bool = false
+var DEBUG_QUE bool = true
 var DEBUG_CHANNELS bool = true
 
 

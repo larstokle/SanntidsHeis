@@ -13,9 +13,9 @@ import (
 )
 
 func Start() {
-	que := orderque.NewOrderQue()
 	localElev := fsm.NewElevator()
 	btnPush := eventmgr.CheckButtons()
+	que := orderque.NewOrderQue()
 
 	transMgr := transactionMgr.New()
 
@@ -27,8 +27,12 @@ func Start() {
 			}
 		}
 	}
-
+	if !que.IsEmpty() {
+		newOrder := que.EarliestNonAssignedOrder() // switch with calculate from twoelevtest
+		ifLowCostThenRequest(newOrder)
+	}
 	if(DEBUG_ELEVMGR){fmt.Printf("elevMgr: init done entering loop\n\n")}
+	
 	go func() { //hmmm skal denne kjøre selv eller skal det go'es i main??
 		for {
 			select {

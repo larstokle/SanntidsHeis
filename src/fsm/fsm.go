@@ -210,7 +210,7 @@ func (elev *ElevatorState) GetCost(order Button_t) int {
 
 	if order.ButtonType == CMD {
 		return newDistance
-	} else if buttonDir == elev.Dir() || elev.Destination() == order.Floor {
+	} else if buttonDir == elev.Dir() {
 		return newDistance + N_FLOORS
 	} else {
 		if(DEBUG_FSM){fmt.Printf("fsm: Unhandlet GetCost! ELevator = %+v, order to get cost for = %+v\n", *elev, order)}
