@@ -1,0 +1,30 @@
+==================
+WARNING: DATA RACE
+Write by goroutine 8:
+  time.(*Timer).Reset()
+      /tmp/workdir/go/src/time/sleep.go:89 +0xf3
+  fsm.(*ElevatorState).NewFloorReached()
+      /home/student/SanntidsHeis/src/fsm/fsm.go:131 +0x1b4
+  fsm.NewElevator.func1()
+      /home/student/SanntidsHeis/src/fsm/fsm.go:67 +0x298
+
+Previous write by goroutine 19:
+  time.(*Timer).Reset()
+      /tmp/workdir/go/src/time/sleep.go:89 +0xf3
+  fsm.(*ElevatorState).goToStateMoving()
+      /home/student/SanntidsHeis/src/fsm/fsm.go:179 +0x2ae
+  fsm.(*ElevatorState).goToStateDoorOpen.func1()
+      /home/student/SanntidsHeis/src/fsm/fsm.go:166 +0x1e2
+
+Goroutine 8 (running) created at:
+  fsm.NewElevator()
+      /home/student/SanntidsHeis/src/fsm/fsm.go:72 +0x1d0
+  _/home/student/SanntidsHeis/src/elevatorMgr.Start()
+      /home/student/SanntidsHeis/src/elevatorMgr/elevatorMgr.go:16 +0x37
+  main.main()
+      /home/student/SanntidsHeis/src/testmain.go:11 +0x10b
+
+Goroutine 19 (finished) created at:
+  time.goFunc()
+      /tmp/workdir/go/src/time/sleep.go:129 +0x6d
+==================

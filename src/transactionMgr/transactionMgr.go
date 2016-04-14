@@ -25,7 +25,7 @@ type transactionMgr_t struct {
 	ToParent        chan message.Message_t
 	ProceedOk		chan bool
 	netReceive      chan message.Message_t
-	netSend         chan message.Message_t
+	netSend         chan<- message.Message_t
 	heartbeatTimers map[int]*time.Timer
 	heartbeatMutex  sync.Mutex
 	myId            int
@@ -37,8 +37,8 @@ func New() *transactionMgr_t {
 	var transMgr transactionMgr_t
 	transMgr.ToParent = make(chan message.Message_t)
 	transMgr.ProceedOk = make(chan bool) 
-	transMgr.netSend, _ = network.MakeSender(broadCastAddr + port)
-	transMgr.netReceive, _ = network.MakeReceiver(port)
+	transMgr.netSend = network.MakeSender(broadCastAddr + port)
+	transMgr.netReceive = network.MakeReceiver(port)
 	transMgr.heartbeatTimers = make(map[int]*time.Timer)
 	transMgr.delegation = make(map[Button_t]map[int]costAndToId_t)
 	transMgr.myId = network.GetLastIPByte()
@@ -64,7 +64,7 @@ func New() *transactionMgr_t {
 					
 					if(DEBUG_TRNSMGR){fmt.Printf("transMgr: WAIT FOR CONFIRMATION FROM ELEVMGR\n")}
 					if(DEBUG_CHANNELS){fmt.Println("transMgr: NEW_ORDER wait for CONFIRMATION could hang")}
-					<-transMgr.ProceedOk //WAIT FOR CONFIRMATION FROM ELEVMGR! COULD USE TIMER, BUT THIST IS PROBABLY BETTER
+					<-transMgr.ProceedOk
 					if(DEBUG_CHANNELS){fmt.Println("transMgr: NEW_ORDER wait for CONFIRMATION didn't hang")}
 					if(DEBUG_TRNSMGR){fmt.Printf("transMgr: GOT CONFIRMATION FROM ELEVMGR\n")}
 				}
@@ -185,7 +185,7 @@ func (transMgr *transactionMgr_t) RemoveElevator(id int) {
 	if id != transMgr.myId{
 		transMgr.ToParent <- message.Message_t{Source: transMgr.myId, MessageId: message.UNASSIGN_ORDER, ElevatorId: id}
 	} else {
-		fmt.Printf("===transMgr: Lost my own heartbeat, all alone in the world")
+		fmt.Printf("===transMgr: Lost my own heartbeat, all alone in the world\n")
 	}
 }
 
@@ -260,11 +260,12 @@ func (transMgr *transactionMgr_t) NewOrder(order Button_t) {
 func (transMgr *transactionMgr_t) RemoveOrder(floor int) {
 	if(DEBUG_TRNSMGR){fmt.Printf("transMgr: sending remove order (floor) on network = %+v\n", floor)}
 	order := Button_t{Floor: floor, ButtonType: UP}
-	
-	if(DEBUG_CHANNELS){fmt.Println("transMgr: RemoveOrder netSend could hang")}
-	transMgr.netSend <- message.Message_t{Source: transMgr.myId, MessageId: message.REMOVE_ORDER, Button: order}
-	if(DEBUG_CHANNELS){fmt.Println("transMgr: RemoveOrder netSend didn't hang")}
-
+	if transMgr.nElevatorsOnline() > 1{
+		if(DEBUG_CHANNELS){fmt.Println("transMgr: RemoveOrder netSend could hang")}
+		transMgr.netSend <- message.Message_t{Source: transMgr.myId, MessageId: message.REMOVE_ORDER, Button: order}
+		if(DEBUG_CHANNELS){fmt.Println("transMgr: RemoveOrder netSend didn't hang")}
+	}
+	//kan dette ligge her eller vil det kunne føre til en panic?? må det flyttes inn i ifen?
 	order.ButtonType = UP
 	transMgr.delegationMutex.Lock()
 	delete(transMgr.delegation, order)

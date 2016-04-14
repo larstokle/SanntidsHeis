@@ -71,7 +71,7 @@ func Start() {
 						fmt.Printf("elevMgr: ERROR new order aldready in que, me or ID %d must be out of sync\n", newMsg.Source)
 					}
 					if(DEBUG_ELEVMGR){fmt.Printf("elevMgr: newMsg waiting for confirmation from transMgr \n")}			
-					transMgr.ProceedOk <- true //GIVE CONFIRMATION TO TRANS! COULD USE TIMER THER, BUT THIST IS PROBABLY BETTER
+					transMgr.ProceedOk <- true //GIVE CONFIRMATION TO TRANS! COULD USE TIMER THERE, BUT THIST IS PROBABLY BETTER
 					if(DEBUG_ELEVMGR){fmt.Printf("elevMgr: newMsg got confirmation from transMgr \n")}			
 
 				case message.DELEGATE_ORDER:

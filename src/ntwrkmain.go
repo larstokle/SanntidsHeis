@@ -1,11 +1,11 @@
 package main
 
 import(
-	"./network"
-	"./message"
+	"network"
+	."message"
 
 	"time"
-	"fmt"
+	//"fmt"
 
 	
 )
@@ -13,26 +13,13 @@ import(
 
 
 func main() {
-	kanal := make(chan message.Message_t)
-	mottaker := make(chan message.Message_t) 
-	stopp := make(chan (bool))
-	
-	network.MakeReceiver(":20000", mottaker, stopp)
-	network.MakeSender("10.22.68.20:20000", kanal, stopp)
-
-	i:= 0
-	
-	
-	for {
-
-		kanal <- message.Message_t{Source: network.GetLastIPByte(), Message_id: message.HEARTBEAT}
-		fmt.Printf("Recieved: %+v\n", <-mottaker)
-		//fmt.Printf("GetLastIPByte: %d \n", network.GetLastIPByte())
-
-		i++
-		time.Sleep(time.Millisecond*2000)
+	ticker := time.NewTicker(time.Millisecond * 3000)
+	sendChan := network.MakeSender("129.241.187.255:20777")
+	recChan := network.MakeReceiver(":20777")
+	defer close(sendChan)
+	for _ = range ticker.C{
+		sendChan <- Message_t{}
+		<- recChan	
 	}
 
-
-	
 }

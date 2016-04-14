@@ -8,6 +8,7 @@ import (
 	"sync/atomic"
 	"sync"
 	"time"
+	"os"
 )
 
 type State_t int32
@@ -26,6 +27,7 @@ var states = [...]string{
 
 const NO_DESTINATION = -1
 const INF_COST = 255
+const MOTOR_ERROR_SEC = 5
 
 func (state State_t) String() string {
 	return states[state]
@@ -39,6 +41,7 @@ type ElevatorState struct {
 	OrderDone   chan int
 	doorTimer   *time.Timer
 	doorTimerMutex sync.Mutex
+	motorErrorTimer *time.Timer
 }
 
 func NewElevator() *ElevatorState {
@@ -48,8 +51,10 @@ func NewElevator() *ElevatorState {
 	elev.OrderDone = make(chan int, 1)
 	floorEvent := eventmgr.CheckFloorSignal()
 	driver.RunDown()
+	elev.motorErrorTimer = time.AfterFunc(time.Second*MOTOR_ERROR_SEC, motorError)
 	elev.NewFloorReached(<-floorEvent)
 	driver.RunStop()
+	elev.motorErrorTimer.Stop()
 
 	elev.goToStateIdle()
 
@@ -123,6 +128,7 @@ func (elev *ElevatorState) NewFloorReached(newFloor int) {
 	if(DEBUG_FSM){fmt.Printf("fsm: New floor reached= %d\n", newFloor)}
 	elev.setFloor(newFloor)
 	driver.SetFloorIndicator(int(elev.floor))
+	elev.motorErrorTimer.Reset(time.Second*MOTOR_ERROR_SEC)
 	if elev.floor == elev.destination {
 		elev.destinationReaced()
 	}
@@ -143,6 +149,7 @@ func (elev *ElevatorState) goToStateDoorOpen() {
 	}
 
 	driver.RunStop()
+	elev.motorErrorTimer.Stop()
 	elev.setState(STATE_DOOR_OPEN)
 	if(DEBUG_CHANNELS){fmt.Println("fsm: goToStateDoorOpen OrderDone could hang")}
 	elev.OrderDone <- int(elev.floor)
@@ -169,8 +176,10 @@ func (elev *ElevatorState) goToStateMoving(direction Direction_t) {
 	switch direction {
 	case DIR_UP:
 		driver.RunUp()
+		elev.motorErrorTimer.Reset(time.Second*MOTOR_ERROR_SEC)
 	case DIR_DOWN:
 		driver.RunDown()
+		elev.motorErrorTimer.Reset(time.Second*MOTOR_ERROR_SEC)
 	default:
 		if(DEBUG_FSM){fmt.Printf("fsm: unknown direction")}
 		return
@@ -183,6 +192,7 @@ func (elev *ElevatorState) goToStateMoving(direction Direction_t) {
 func (elev *ElevatorState) goToStateIdle() {
 	if(DEBUG_FSM){fmt.Println("fsm: Going idle in floor = ", elev.floor)}
 	driver.RunStop()
+	elev.motorErrorTimer.Stop()
 	elev.setState(STATE_IDLE)
 }
 
@@ -227,4 +237,13 @@ func buttonTypeToDirection(buttonType int) Direction_t {
 	default:
 		return DIR_STOP
 	}
+}
+
+func motorError(){
+	driver.RunStop()
+	fmt.Printf("\n\n\n ================== ERROR, ELEVATOR MOTOR NOT WORKING PROPERLY ==========\n")
+	fmt.Printf("took %d seconds to reach new floor when running, try fixing the problem and restart\n",MOTOR_ERROR_SEC)
+	fmt.Printf("Program exiting now!\n\n\n")
+	fmt.Printf("===============================================================================\n")
+	os.Exit(1)
 }

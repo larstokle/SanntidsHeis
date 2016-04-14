@@ -9,79 +9,86 @@ import(
 	"encoding/json"
 )
 
-
-func MakeSender(addr string) (chan Message_t, chan bool) {
+//close channel to exit
+func MakeSender(addr string) (chan<- Message_t) {
 	msg := make(chan Message_t)
-	quit := make(chan bool)
-
-	toAddr, err := net.ResolveUDPAddr("udp", addr)
-	checkAndPrintError(err, "ResolveUDP error")
-
-	conn, err := net.DialUDP("udp", nil, toAddr)
-	checkAndPrintError(err, "DialUDP error")
 
 	go func() {
-		defer conn.Close()
-		for {
-			select {
-			case q := <-quit:
-				if q {
-					defer func() { quit <- false }()
-					defer fmt.Println("Quiting Sender")
-					return
-				}
-			case newMsg := <-msg:
-				//fmt.Printf("Sender sending %+v \n", newMsg)
+		toAddr, err := net.ResolveUDPAddr("udp", addr)
+		checkAndPrintError(err, "ERROR! ResolveUDPAddr")
+		
 
-				json_msg, _ := json.Marshal(newMsg)
-				_, err := conn.Write(json_msg)
-				checkAndPrintError(err, "WriteToUDP error")
+		waitForNetworkAvailability()
+		conn, err := net.DialUDP("udp", nil, toAddr)
+		checkAndPrintError(err, "ERROR! DialUDP")
+
+		defer conn.Close()
+		for newMsg := range msg {
+			//fmt.Printf("Sender sending %+v \n", newMsg)
+			json_msg, err := json.Marshal(newMsg)
+			checkAndPrintError(err, "ERROR! Marshal")
+			_, err = conn.Write(json_msg)
+			if checkAndPrintError(err, "ERROR! WriteToUDP"){
+				waitForNetworkAvailability() //MULIG VI MÅ VÆRE SMARTERE HER!
 			}
 		}
+		
+		fmt.Printf("Sender: Channel closed. function returning\n")
 	}()
-	return msg, quit
+	return msg
 }
 
-
-func MakeReceiver(port string) (chan Message_t, chan bool) {
+//Send to channel for exit.
+func MakeReceiver(port string) (chan Message_t) {
 	msg := make(chan Message_t)
-	quit := make(chan bool)
-
-	localAddr, err := net.ResolveUDPAddr("udp", port)
-	checkAndPrintError(err, "Resolve UDP error")
-
-	conn, err := net.ListenUDP("udp", localAddr)
-	checkAndPrintError(err, "ListenUDP error")
-	
 	go func() {
+		localAddr, err := net.ResolveUDPAddr("udp", port)
+		checkAndPrintError(err, "Resolve UDP error")
+
+		conn, err := net.ListenUDP("udp", localAddr)
+		if err != nil {
+			fmt.Printf("ERROR: ListenUDP error: %s\n",err)
+		}
 		defer conn.Close()
 
 		for {
-			select {
-			case q := <-quit:
-				if q {
-					defer func() { quit <- false }()
-					defer fmt.Println("Quiting Reciever")
+			buf := make([]byte, 1024)
+			conn.SetReadDeadline(time.Now().Add(time.Millisecond * 2000))
+			n, _, err := conn.ReadFromUDP(buf)
+			if !checkAndPrintError(err, "ERROR! ReadFromUDP:"){
+				//fmt.Printf("Reciever recieved: %+v of size: %d\n",buf[0:n], n)
+				var recived Message_t
+				err = json.Unmarshal(buf[0:n], &recived)
+				checkAndPrintError(err, "ERROR! Unmarshal")
+				//fmt.Printf("Reciever recieved: %+v \n",recived)
+				select{
+				case <-msg:
+					fmt.Printf("Reciever: Received on send channel, or send channel closed. function returning\n")
 					return
+				case msg <- recived:
 				}
+			}
+			select{
+			case <- msg:
+				fmt.Printf("Reciever: Received on send channel, or channel closed. function returning\n")
+				return
 			default:
-				buf := make([]byte, 1024)
-				conn.SetReadDeadline(time.Now().Add(time.Millisecond * 2000))
-				n, _, err := conn.ReadFromUDP(buf)
-				if !checkAndPrintError(err, "ReadFromUDP error"){
-					//fmt.Printf("Reciever recieved: %+v of size: %d\n",buf[0:n], n)
-					var recived Message_t
-					json.Unmarshal(buf[0:n], &recived)
-					//fmt.Printf("Reciever recieved: %+v \n",recived)
-
-					msg <- recived
-				}
+				continue
 			}
 		}
 	}()
-	return msg, quit
+	return msg
 }
 
+func waitForNetworkAvailability(){
+	if GetLocalIP()[0:2] == "::"{
+		fmt.Println("Sender: No network available. Wait for connection to establish")
+		for GetLocalIP()[0:2] == "::"{
+			time.Sleep(time.Second*2)
+		}
+		fmt.Println("Sender: Network found. Now proceeding for connection")
+	}
+}
 
 func checkAndPrintError(err error, info string) bool {
 	if err != nil {
@@ -106,6 +113,9 @@ func GetLocalIP() string{
 
 func GetLastIPByte() int{
 	addr := GetLocalIP()
+	if addr[0:2] == "::"{
+		return -1
+	}
 	dot := 0
 	backslash := 0
 	for i, ch := range addr {

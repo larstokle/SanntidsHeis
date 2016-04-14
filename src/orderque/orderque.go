@@ -62,7 +62,7 @@ func (que *orderQue_t) RemoveOrdersOnFloor(floor int){
 		que.RemoveOrder(order)
 	}
 	if(DEBUG_QUE){fmt.Printf("Remaining orders: \n")}
-	que.Print()
+	if(DEBUG_QUE){que.Print()}
 }
 
 func (que *orderQue_t) UnassignOrdersToID(id int){

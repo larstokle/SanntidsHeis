@@ -8,8 +8,8 @@ import (
 )
 
 
-func CheckButtons() chan Button_t{
-	event := make(chan Button_t, 100)
+func CheckButtons() <-chan Button_t{
+	event := make(chan Button_t, 10)
 	var lastButtonState [N_FLOORS][N_BUTTON_TYPES]bool
 	floor, button := 0, 0
 	fmt.Println("eventmgr: CheckButtons started\n")
@@ -42,7 +42,7 @@ func CheckButtons() chan Button_t{
 	return event
 }
 
-func CheckFloorSignal() chan int{
+func CheckFloorSignal() <-chan int{
 	event := make(chan int)  
 	lastFloorState := -1
 	fmt.Println("eventmgr: CheckFloorSignal started\n")
