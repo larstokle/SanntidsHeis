@@ -25,6 +25,7 @@ func NewOrderQue()orderQue_t{
 			que[floor][orderType].lastChangeTime = startTime
 		}
 	}
+	fmt.Println("que: init done NewOrderQue returned\n")
 	return que
 }
 
@@ -40,7 +41,7 @@ func (que *orderQue_t) AddOrder(button Button_t) {
 }
 
 func (que *orderQue_t) RemoveOrder(button Button_t) {
-	//fmt.Printf("que: RemoveOrder = %+v\n",button)
+	fmt.Printf("que: RemoveOrder = %+v\n",button)
 	if que.HasOrder(button) {
 		que[button.Floor][button.ButtonType].hasOrder = false
 		que[button.Floor][button.ButtonType].lastChangeTime = time.Now()
@@ -70,15 +71,14 @@ func (que *orderQue_t) UnassignOrderToID(id int){
 }
 
 func (que *orderQue_t) AssignOrderToId(button Button_t, id int) bool{
-	fmt.Printf("que: AssignOrder = %+v, ToId = %d\n",button,id)
 	if !que.HasOrder(button){
 		return false
 	}
 
 	que.UnassignOrderToID(id)
+	fmt.Printf("que: AssignOrder = %+v, ToId = %d\n",button,id)
 	que[button.Floor][button.ButtonType].assignedToID = id
 
-	fmt.Printf("que: AssignOrder done\n")
 	return true
 }
 

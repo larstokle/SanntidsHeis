@@ -1,0 +1,79 @@
+
+tried fixing with mutex on delegation map
+==================  
+WARNING: DATA RACE
+Read by goroutine 13:
+  runtime.mapaccess1()
+      /tmp/workdir/go/src/runtime/hashmap.go:272 +0x0
+  transactionMgr.(*transactionMgr_t).handleSetCost()
+      /home/student/LC/SanntidsHeis/src/transactionMgr/transactionMgr.go:221 +0xb5
+  transactionMgr.New.func1()
+      /home/student/LC/SanntidsHeis/src/transactionMgr/transactionMgr.go:69 +0x1cf1
+
+Previous write by goroutine 14:
+  runtime.mapassign1()
+      /tmp/workdir/go/src/runtime/hashmap.go:411 +0x0
+  transactionMgr.(*transactionMgr_t).handleSetCost()
+      /home/student/LC/SanntidsHeis/src/transactionMgr/transactionMgr.go:223 +0x3f3
+  transactionMgr.(*transactionMgr_t).SendCost()
+      /home/student/LC/SanntidsHeis/src/transactionMgr/transactionMgr.go:217 +0x2b8
+  transactionMgr.(*transactionMgr_t).RequestOrder()
+      /home/student/LC/SanntidsHeis/src/transactionMgr/transactionMgr.go:185 +0x45b
+  _/home/student/LC/SanntidsHeis/src/elevatorMgr.Start.func1()
+      /home/student/LC/SanntidsHeis/src/elevatorMgr/elevatorMgr.go:54 +0xa7d
+
+Goroutine 13 (running) created at:
+  transactionMgr.New()
+      /home/student/LC/SanntidsHeis/src/transactionMgr/transactionMgr.go:122 +0x374
+  _/home/student/LC/SanntidsHeis/src/elevatorMgr.Start()
+      /home/student/LC/SanntidsHeis/src/elevatorMgr/elevatorMgr.go:18 +0xcf
+  main.main()
+      /home/student/LC/SanntidsHeis/src/testmain.go:11 +0x10b
+
+Goroutine 14 (running) created at:
+  _/home/student/LC/SanntidsHeis/src/elevatorMgr.Start()
+      /home/student/LC/SanntidsHeis/src/elevatorMgr/elevatorMgr.go:129 +0x151
+  main.main()
+      /home/student/LC/SanntidsHeis/src/testmain.go:11 +0x10b
+==================
+
+
+
+
+one read from heartbeattimers were done without lock
+==================
+WARNING: DATA RACE
+Read by goroutine 13:
+  runtime.mapaccess2_fast64()
+      /tmp/workdir/go/src/runtime/hashmap_fast.go:137 +0x0
+  transactionMgr.(*transactionMgr_t).handleSetCost()
+      /home/student/LC/SanntidsHeis/src/transactionMgr/transactionMgr.go:228 +0x67b
+  transactionMgr.New.func1()
+      /home/student/LC/SanntidsHeis/src/transactionMgr/transactionMgr.go:69 +0x1cf1
+
+Previous write by goroutine 14:
+  runtime.mapassign1()
+      /tmp/workdir/go/src/runtime/hashmap.go:411 +0x0
+  transactionMgr.(*transactionMgr_t).handleSetCost()
+      /home/student/LC/SanntidsHeis/src/transactionMgr/transactionMgr.go:224 +0x4da
+  transactionMgr.(*transactionMgr_t).SendCost()
+      /home/student/LC/SanntidsHeis/src/transactionMgr/transactionMgr.go:217 +0x2b8
+  transactionMgr.(*transactionMgr_t).RequestOrder()
+      /home/student/LC/SanntidsHeis/src/transactionMgr/transactionMgr.go:185 +0x45b
+  _/home/student/LC/SanntidsHeis/src/elevatorMgr.Start.func1()
+      /home/student/LC/SanntidsHeis/src/elevatorMgr/elevatorMgr.go:54 +0xa7d
+
+Goroutine 13 (running) created at:
+  transactionMgr.New()
+      /home/student/LC/SanntidsHeis/src/transactionMgr/transactionMgr.go:122 +0x374
+  _/home/student/LC/SanntidsHeis/src/elevatorMgr.Start()
+      /home/student/LC/SanntidsHeis/src/elevatorMgr/elevatorMgr.go:18 +0xcf
+  main.main()
+      /home/student/LC/SanntidsHeis/src/testmain.go:11 +0x10b
+
+Goroutine 14 (running) created at:
+  _/home/student/LC/SanntidsHeis/src/elevatorMgr.Start()
+      /home/student/LC/SanntidsHeis/src/elevatorMgr/elevatorMgr.go:129 +0x151
+  main.main()
+      /home/student/LC/SanntidsHeis/src/testmain.go:11 +0x10b
+==================

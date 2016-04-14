@@ -22,14 +22,14 @@ type costAndToId_t struct {
 }
 
 type transactionMgr_t struct {
-	Receive         chan message.Message_t //bad naming. it is the output from network
+	Receive         chan message.Message_t //bad naming. it is the msg to elevMgr
 	netReceive      chan message.Message_t
 	netSend         chan message.Message_t
 	heartbeatTimers map[int]*time.Timer
 	heartbeatMutex  sync.Mutex
 	myId            int
-	delegatingOrder bool
 	delegation      map[Button_t]map[int]costAndToId_t
+	delegationMutex sync.Mutex
 }
 
 func New() *transactionMgr_t {
@@ -42,64 +42,42 @@ func New() *transactionMgr_t {
 	transMgr.myId = network.GetLastIPByte()
 
 	transMgr.startHeartbeat()
+	fmt.Println("transMgr: init done entering loop")
 	go func() {
 		for {
-
 			receivedData := <-transMgr.netReceive
 			//are receivedData.Source in heartbeatTimers??
 			switch receivedData.MessageId {
+
 			case message.HEARTBEAT:
 				beat := Heartbeat_t{Id: receivedData.Source}
 				transMgr.NewHeartBeat(beat)
-			case message.NEW_ORDER: //new event
+
+			case message.NEW_ORDER:
 				if receivedData.Source != transMgr.myId {
 					fmt.Printf("transMgr: Received NEW_ORDER: %+v\n", receivedData)
 					transMgr.Receive <- receivedData
+					<-transMgr.Receive //WAIT FOR CONFIRMATION FROM ELEVMGR! COULD USE TIMER, BUT THIST IS PROBABLY BETTER
 				}
-			case message.REQUEST_ORDER:
-				if receivedData.Source != transMgr.myId {
-					order := receivedData.Button
-					cost := receivedData.Cost
-					id := receivedData.Source
-					if transMgr.delegation[order] == nil {
-						fmt.Printf("transMgr: Receiving a request on order %+v, with cost %d\n ", order, cost)
-						transMgr.delegation[order] = make(map[int]costAndToId_t)
-						transMgr.delegation[order][id] = costAndToId_t{cost: cost, toId: NONLEGAL_ID}
-						transMgr.Receive <- receivedData
-					} else {
-						fmt.Println("ẗransMgr: REQUEST_ORDER Receiving an already requested order")
-					}
 
-				}
 			case message.COST:
 				order := receivedData.Button
+				cost := receivedData.Cost
 				id := receivedData.Source
-				newCost := receivedData.Cost
-				if oldCostAndToId, present := transMgr.delegation[order][id]; !present {
-					transMgr.delegation[order][id] = costAndToId_t{cost: newCost, toId: NONLEGAL_ID}
-					if len(transMgr.delegation[order]) == transMgr.nElevetorsOnline() {
-						lowestCostId := 256
-						lowestCost := 100 * N_FLOORS
-						for id, costAndToId := range transMgr.delegation[order] {
-							if costAndToId.cost < lowestCost || (costAndToId.cost == lowestCost && id < lowestCostId) {
-								lowestCostId = id
-								lowestCost = costAndToId.cost
-							}
-						}
-						fmt.Println("DELEGATE NOW FUCKER!!!!")
-						transMgr.DelegateOrder(order, lowestCostId)
-						tempCostAndToId := transMgr.delegation[order][transMgr.myId]
-						tempCostAndToId.toId = lowestCostId
-						transMgr.delegation[order][transMgr.myId] = tempCostAndToId
-					}
-				} else {
-					fmt.Printf("transMgr: got multiple cost on order %+v from %d. oldCostAndToId = %d, newCost got = %d\n", order, id, oldCostAndToId, newCost)
+				if id != transMgr.myId {
+					fmt.Printf("transMgr: Received COST msg on order %+v from %d with cost %d \n", order, id, cost)
+					transMgr.handleSetCost(order, cost, id)
 				}
+
 			case message.DELEGATE_ORDER:
-				fmt.Printf("transMgr: DELEGATE_ORDER (%+v) from %d to %d\n", receivedData.Button, receivedData.Source, receivedData.ElevatorId)
+				if receivedData.Source == transMgr.myId{
+					continue
+				}
+				fmt.Printf("transMgr: Received DELEGATE_ORDER msg (%+v) from %d to %d\n", receivedData.Button, receivedData.Source, receivedData.ElevatorId)
 				order := receivedData.Button
 				id := receivedData.Source
 				toId := receivedData.ElevatorId
+				transMgr.delegationMutex.Lock()
 				if _, present := transMgr.delegation[order][id]; present {
 					tempCostAndId := transMgr.delegation[order][id]
 					tempCostAndId.toId = toId
@@ -107,26 +85,38 @@ func New() *transactionMgr_t {
 					nDelegated := 0
 					allDelegatedEqual := true
 					for _, costAndToId := range transMgr.delegation[order] {
-						if costAndToId.toId != NONLEGAL_ID {
-							nDelegated++
-						}
-						if transMgr.delegation[order][transMgr.myId].toId != costAndToId.toId {
+						if costAndToId.toId == NONLEGAL_ID {
+							break
+						} else if transMgr.delegation[order][transMgr.myId].toId != costAndToId.toId {
 							allDelegatedEqual = false
 							break
 						}
+						nDelegated++
 					}
 					if !allDelegatedEqual {
 						fmt.Printf("trasnMgr: allDelegatedEqual = false, delegation[%+v] = %+v\n", order, transMgr.delegation[order])
 					} else if nDelegated == len(transMgr.delegation[order]) {
-						fmt.Printf("tranMgr: DELEGATE_ORDER completed. delegated order %+v to elevator %d\n", order, transMgr.delegation[order][transMgr.myId].toId)
+						fmt.Printf("tranMgr: allDelegatedEqual = true. delegated order %+v to elevator %d\n", order, transMgr.delegation[order][transMgr.myId].toId)
 						transMgr.Receive <- message.Message_t{MessageId: message.DELEGATE_ORDER, Button: order, ElevatorId: transMgr.delegation[order][transMgr.myId].toId}
+						transMgr.delegation[order] = nil
 					}
+				} else{
+					fmt.Printf("transMgr: Received DELEGATE_ORDER (%+v) where cost not set from %d\n", order, id)
 				}
+				transMgr.delegationMutex.Unlock()
 
 			case message.REMOVE_ORDER:
 				if receivedData.Source != transMgr.myId {
 					fmt.Printf("transMgr: Received REMOVE_ORDER: %+v\n", receivedData)
 					transMgr.Receive <- receivedData
+
+					order := receivedData.Button
+					order.ButtonType = UP
+					transMgr.delegationMutex.Lock()
+					delete(transMgr.delegation, order)
+					order.ButtonType = DOWN
+					delete(transMgr.delegation, order)
+					transMgr.delegationMutex.Unlock()
 				}
 			default:
 				fmt.Printf("transMgr: received unhandled MessageId \n", receivedData.MessageId)
@@ -134,7 +124,6 @@ func New() *transactionMgr_t {
 		}
 
 	}()
-
 	return &transMgr
 }
 
@@ -143,22 +132,20 @@ func (transMgr transactionMgr_t) startHeartbeat() {
 		for {
 			//fmt.Printf("Sending Heartbeat: %+v \n", beat)
 			transMgr.netSend <- message.Message_t{Source: transMgr.myId, MessageId: message.HEARTBEAT}
-			time.Sleep(time.Millisecond * 200)
+			time.Sleep(time.Millisecond * 500)
 		}
 	}()
 }
 
 func (transMgr *transactionMgr_t) NewHeartBeat(beat Heartbeat_t) {
+	transMgr.heartbeatMutex.Lock()
 	if _, exists := transMgr.heartbeatTimers[beat.Id]; exists {
-		transMgr.heartbeatMutex.Lock()
-		transMgr.heartbeatTimers[beat.Id].Reset(time.Second * 1)
+		transMgr.heartbeatTimers[beat.Id].Reset(time.Millisecond * 1500)
 		transMgr.heartbeatMutex.Unlock()
 	} else {
-		transMgr.heartbeatMutex.Lock()
-		transMgr.heartbeatTimers[beat.Id] = time.AfterFunc(time.Second*1, func() { transMgr.RemoveElevator(beat.Id) })
-		transMgr.nElevetorsOnline++
+		transMgr.heartbeatTimers[beat.Id] = time.AfterFunc(time.Millisecond * 1500, func() { transMgr.RemoveElevator(beat.Id) })
 		transMgr.heartbeatMutex.Unlock()
-		fmt.Printf("Got New Heartbeat ID: %+v \n", beat)
+		fmt.Printf("===Got New Heartbeat ID: %+v, now have %d elevs===\n", beat, transMgr.nElevatorsOnline())
 	}
 }
 
@@ -171,25 +158,37 @@ func (transMgr *transactionMgr_t) nElevatorsOnline() int {
 
 func (transMgr *transactionMgr_t) RemoveElevator(id int) {
 	transMgr.heartbeatMutex.Lock()
-	transMgr.nElevetorsOnline--
 	delete(transMgr.heartbeatTimers, id)
 	transMgr.heartbeatMutex.Unlock()
-	fmt.Printf("Lost Heartbeat ID: %+v \n", id)
+	fmt.Printf("===Lost Heartbeat ID: %+v, now have %d elevs===\n", id, transMgr.nElevatorsOnline())
 }
 
-func (transMgr *transactionMgr_t) DelegateOrder(order Button_t, id int) {
-	transMgr.netSend <- message.Message_t{Source: transMgr.myId, MessageId: message.DELEGATE_ORDER, Button: order, ElevatorId: id}
-	fmt.Printf("transMgr: Delegate order (%+v) to id %d\n", order, id)
+func (transMgr *transactionMgr_t) DelegateOrder(order Button_t) {
+	lowestCostId := 256
+	lowestCost := 100 * N_FLOORS
+	transMgr.delegationMutex.Lock()
+	for id, costAndToId := range transMgr.delegation[order] {
+		if costAndToId.cost < lowestCost || (costAndToId.cost == lowestCost && id < lowestCostId) {
+			lowestCostId = id
+			lowestCost = costAndToId.cost
+		}
+	}
+	tempCostAndToId := transMgr.delegation[order][transMgr.myId]
+	tempCostAndToId.toId = lowestCostId
+	transMgr.delegation[order][transMgr.myId] = tempCostAndToId
+	transMgr.netSend <- message.Message_t{Source: transMgr.myId, MessageId: message.DELEGATE_ORDER, Button: order, ElevatorId: lowestCostId}
+	transMgr.delegationMutex.Unlock()
+	fmt.Printf("transMgr: Delegate order %+v to id %d\n", order, lowestCostId)
 }
 
-func (transMgr *transactionMgr_t) RequestOrder(order Button_t, cost int) {
-	if transMgr.delegation[order] == nil {
-		fmt.Printf("transMgr: Starting a request on order %+v, with cost %d\n ", order, cost)
-		transMgr.delegation[order] = make(map[int]costAndToId_t)
-		transMgr.delegation[order][transMgr.myId] = costAndToId_t{cost: cost, toId: NONLEGAL_ID}
-		transMgr.netSend <- message.Message_t{Source: transMgr.myId, MessageId: message.REQUEST_ORDER, Button: order, Cost: cost}
-	} else {
-		fmt.Println("ẗransMgr: Requesting an already requested order")
+func (transMgr *transactionMgr_t) RequestOrder(order Button_t, cost int) bool{ //BYGD OM TIL Å RETURNERE TRUE OM HEIS KAN TA DEN MED EN GANG: UNGÅR KANALBRUK OG DERMED LOCK
+	if transMgr.nElevatorsOnline() <= 1{
+		fmt.Printf("transMgr: RequestOrder on %+v with cost %d, but no other elevs\n", order, cost)
+		return true //transMgr.Receive <- message.Message_t{MessageId: message.DELEGATE_ORDER, Button: order, ElevatorId: transMgr.myId}
+	} else{
+		fmt.Printf("transMgr: RequestOrder on %+v with cost %d and %d elevs online\n", order, cost, transMgr.nElevatorsOnline())
+		transMgr.SendCost(order, cost)
+		return false
 	}
 }
 
@@ -198,17 +197,56 @@ func (transMgr *transactionMgr_t) MyId() int {
 }
 
 func (transMgr *transactionMgr_t) NewOrder(order Button_t) {
-	fmt.Printf("transMgr: sending new order on network = %+v\n", order)
-	transMgr.netSend <- message.Message_t{Source: transMgr.myId, MessageId: message.NEW_ORDER, Button: order}
+	numElevs := transMgr.nElevatorsOnline()
+	if numElevs > 1{
+		fmt.Printf("transMgr: sending new order on network = %+v to in total %d elevs\n", order, numElevs)
+		transMgr.netSend <- message.Message_t{Source: transMgr.myId, MessageId: message.NEW_ORDER, Button: order}
+	} else{
+		fmt.Printf("transMgr: did not send new order (%+v) since numElevs = %d \n",order, numElevs)
+	}
 }
 
 func (transMgr *transactionMgr_t) RemoveOrder(floor int) {
 	fmt.Printf("transMgr: sending remove order (floor) on network = %+v\n", floor)
 	order := Button_t{Floor: floor, ButtonType: UP}
 	transMgr.netSend <- message.Message_t{Source: transMgr.myId, MessageId: message.REMOVE_ORDER, Button: order}
+	order.ButtonType = UP
+	transMgr.delegationMutex.Lock()
+	delete(transMgr.delegation, order)
+	order.ButtonType = DOWN
+	delete(transMgr.delegation, order)
+	transMgr.delegationMutex.Unlock()
 }
 
-func (transMgr *transactionMgr_t) Cost(order Button_t, cost int) { //Rename til send cost?
-	fmt.Printf("transMgr: sending cost (= %d) on order (= %+v) on network\n", cost, order)
+func (transMgr *transactionMgr_t) SendCost(order Button_t, cost int) {
+	fmt.Printf("transMgr: sending cost %d on order %+v on network\n", cost, order)
 	transMgr.netSend <- message.Message_t{Source: transMgr.myId, MessageId: message.COST, Button: order, Cost: cost}
+	transMgr.handleSetCost(order, cost, transMgr.myId)
+}
+
+func (transMgr *transactionMgr_t) handleSetCost(order Button_t, cost int, id int){
+	transMgr.delegationMutex.Lock()
+	if transMgr.delegation[order] == nil {
+		fmt.Printf("transMgr: New delegation sequence on order %+v, setting cost %d to id %d\n", order, cost, id)
+		transMgr.delegation[order] = make(map[int]costAndToId_t)
+		transMgr.delegation[order][id] = costAndToId_t{cost: cost, toId: NONLEGAL_ID}
+		transMgr.delegationMutex.Unlock()
+		if id != transMgr.myId{
+			transMgr.Receive <- message.Message_t{MessageId: message.COST, Button: order}
+		}
+	} else if oldCostAndToId, present := transMgr.delegation[order][id]; !present {
+		fmt.Printf("transMgr: Setting cost on order %+v, with cost %d to %d in existing delegation sequence\n", order, cost, id)
+		transMgr.delegation[order][id] = costAndToId_t{cost: cost, toId: NONLEGAL_ID}
+		pendingElevs := transMgr.nElevatorsOnline() - len(transMgr.delegation[order])
+		if pendingElevs <= 0 {
+			transMgr.delegationMutex.Unlock()
+			transMgr.DelegateOrder(order)
+		} else {
+			transMgr.delegationMutex.Unlock()
+			fmt.Printf("transMgr: No delegation yet, still waiting for %d other elevs\n",pendingElevs)
+		}
+	} else {
+		transMgr.delegationMutex.Unlock()
+		fmt.Printf("transMgr: got multiple cost on order %+v from %d. oldCostAndToId = %d, newCost got = %d\n", order, id, oldCostAndToId, cost)
+	}
 }

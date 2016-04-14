@@ -18,7 +18,7 @@ const (
 
 )
 
-type Direction_t int
+type Direction_t int32
 
 const(
 	DIR_DOWN = -1
@@ -48,9 +48,9 @@ var buttonTypes = [...]string{
 func (btn Button_t) String() string {
 	
 	if btn.ButtonType < len(buttonTypes){
-		return "Floor:" + strconv.Itoa(btn.Floor) + ", Type: " + buttonTypes[btn.ButtonType]
+		return "{Floor:" + strconv.Itoa(btn.Floor) + ", Type: " + buttonTypes[btn.ButtonType] + "}"
 	}else{
-		return "Floor:" + strconv.Itoa(btn.Floor) + ", Type unknown: " + strconv.Itoa(btn.ButtonType)
+		return "{Floor:" + strconv.Itoa(btn.Floor) + ", Type unknown: " + strconv.Itoa(btn.ButtonType) + "}"
 	}
 }
 

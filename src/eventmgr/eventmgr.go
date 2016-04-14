@@ -12,9 +12,9 @@ func CheckButtons() chan Button_t{
 	event := make(chan Button_t, 100)
 	var lastButtonState [N_FLOORS][N_BUTTON_TYPES]bool
 	floor, button := 0, 0
-
+	fmt.Println("eventmgr: CheckButtons started\n")
 	go func(){
-		for true {
+		for {
 			pressed := driver.ReadButton(button, floor)
 			if pressed != lastButtonState[floor][button] {
 				lastButtonState[floor][button] = pressed
@@ -44,9 +44,9 @@ func CheckButtons() chan Button_t{
 func CheckFloorSignal() chan int{
 	event := make(chan int)
 	lastFloorState := -1
-
+	fmt.Println("eventmgr: CheckFloorSignal started\n")
 	go func(){
-		for true {
+		for {
 			newFloorState := driver.GetFloorSignal()
 			if newFloorState != lastFloorState {
 				lastFloorState = newFloorState
@@ -54,6 +54,7 @@ func CheckFloorSignal() chan int{
 					event <- newFloorState
 				}
 			}
+			time.Sleep(time.Millisecond * 20)
 		}
 	}()
 	return event
