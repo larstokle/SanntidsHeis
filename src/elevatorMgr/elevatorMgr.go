@@ -19,60 +19,42 @@ func Start() {
 
 	transMgr := transactionMgr.New()
 
+	ifLowCostThenRequest := func(order Button_t){
+		if order != NONVALID_BUTTON{
+			cost := localElev.GetCost(order)
+			if cost < fsm.INF_COST {
+				transMgr.RequestOrder(order, cost)
+			}
+		}
+	}
+
 	if(DEBUG_ELEVMGR){fmt.Printf("elevMgr: init done entering loop\n\n")}
 	go func() { //hmmm skal denne kjøre selv eller skal det go'es i main??
 		for {
 			select {
 			case floorDone := <-localElev.OrderDone:
-				if(DEBUG_ELEVMGR){fmt.Printf("elevMgr: floorDone from fsm = %+v\n", floorDone)}
+				if(DEBUG_ELEVMGR){fmt.Printf("elevMgr: floorDone case from fsm = %+v\n", floorDone)}
 				que.RemoveOrdersOnFloor(floorDone)
 				transMgr.RemoveOrder(floorDone) //trøbbel! vi må vite at det ikke er en en cmd!! eller ikke ?? hmmm...
 				if !que.IsEmpty() {
 					newOrder := que.EarliestNonAssignedOrder() // switch with calculate from twoelevtest
-					if newOrder.ButtonType == CMD {
-						if(DEBUG_ELEVMGR){fmt.Printf("elevMgr: setting NewDestination: %+v \n", newOrder)}
-						que.AssignOrderToId(newOrder, transMgr.MyId())
-						localElev.NewDestination(newOrder.Floor)
-					} else if newOrder != NONVALID_BUTTON {
-						cost := localElev.GetCost(newOrder)
-						canTakeAtOnce := transMgr.RequestOrder(newOrder, cost)
-						if canTakeAtOnce{ //DENNE PRØVER Å LØSE PROBLEMET LENGRE NED MED REQUEST FØR COST OG MOTSATT, VED Å TILLATE UBUFFRET FRA TRANS: LITT ADD HOOK
-							que.AssignOrderToId(newOrder, transMgr.MyId())
-							localElev.NewDestination(newOrder.Floor)
-						}
-					} else {
-						if(DEBUG_ELEVMGR){fmt.Printf("elevMgr: que returned NONVALID_BUTTON while !que.IsEmpty() => all orders taken\n")}
-					}
+					ifLowCostThenRequest(newOrder)
 				}
 				if(DEBUG_ELEVMGR){fmt.Printf("elevMgr: floorDone case done = %+v\n", floorDone)}				
-				continue // er ikke denne unødvendig?
+				continue // er ikke denne unødvendig? hvordan virker select? begynner den på ny etter en case? eller tar den neste case?
 
 			case newBtn := <-btnPush:
-				if(DEBUG_ELEVMGR){fmt.Printf("elevMgr: newBtn from eventmgr = %+v\n", newBtn)}
+				if(DEBUG_ELEVMGR){fmt.Printf("elevMgr: newBtn case from eventmgr = %+v\n", newBtn)}
 				if !que.HasOrder(newBtn) {
 					que.AddOrder(newBtn)
-					cost := localElev.GetCost(newBtn)
-					if newBtn.ButtonType == CMD && cost < fsm.INF_COST {
-						if(DEBUG_ELEVMGR){fmt.Printf("elevMgr: setting NewDestination: %+v \n", newBtn)}
-						que.AssignOrderToId(newBtn, transMgr.MyId())
-						localElev.NewDestination(newBtn.Floor)
-					} else if newBtn.ButtonType != CMD {
-						transMgr.NewOrder(newBtn)
-						if cost < fsm.INF_COST {
-							canTakeAtOnce := transMgr.RequestOrder(newBtn, cost)
-							if canTakeAtOnce{ //DENNE PRØVER Å LØSE PROBLEMET LENGRE NED MED REQUEST FØR COST OG MOTSATT, VED Å TILLATE UBUFFRET FRA TRANS: LITT ADD HOOK
-								if(DEBUG_ELEVMGR){fmt.Printf("elevMgr: confirmation to take order at once from transMgr \n")}			
-								que.AssignOrderToId(newBtn, transMgr.MyId())
-								localElev.NewDestination(newBtn.Floor)								
-							}
-						}
-					}	
+					transMgr.NewOrder(newBtn)
+					ifLowCostThenRequest(newBtn)
 				}
 				if(DEBUG_ELEVMGR){fmt.Printf("elevMgr: newBtn case done! = %+v\n", newBtn)}
 
 
-			case newMsg := <-transMgr.Receive:
-				if(DEBUG_ELEVMGR){fmt.Printf("elevMgr: newMsg from transMgr = %+v\n", newMsg)}
+			case newMsg := <-transMgr.ToParent:
+				if(DEBUG_ELEVMGR){fmt.Printf("elevMgr: newMsg case from transMgr = %+v\n", newMsg)}
 				switch newMsg.MessageId {
 
 				case message.NEW_ORDER:
@@ -80,17 +62,12 @@ func Start() {
 					if(DEBUG_ELEVMGR){fmt.Printf("elevMgr: newOrder from transMgr = %+v\n", newOrder)}
 					if !que.HasOrder(newOrder) {
 						que.AddOrder(newOrder)
-						cost := localElev.GetCost(newOrder)
-						if cost < fsm.INF_COST {
-							canTakeAtOnce := transMgr.RequestOrder(newOrder, cost)
-							if canTakeAtOnce{ //DENNE PRØVER Å LØSE PROBLEMET LENGRE NED MED REQUEST FØR COST OG MOTSATT, VED Å TILLATE UBUFFRET FRA TRANS: LITT ADD HOOK
-								que.AssignOrderToId(newOrder, transMgr.MyId())
-								localElev.NewDestination(newOrder.Floor)
-							}
-						}
+						ifLowCostThenRequest(newOrder)
+					} else{
+						fmt.Printf("elevMgr: ERROR new order aldready in que, me or ID %d must be out of sync\n", newMsg.Source)
 					}
 					if(DEBUG_ELEVMGR){fmt.Printf("elevMgr: newMsg waiting for confirmation from transMgr \n")}			
-					transMgr.Receive <- message.Message_t{} //GIVE CONFIRMATION TO TRANS! COULD USE TIMER THER, BUT THIST IS PROBABLY BETTER
+					transMgr.ProceedOk <- true //GIVE CONFIRMATION TO TRANS! COULD USE TIMER THER, BUT THIST IS PROBABLY BETTER
 					if(DEBUG_ELEVMGR){fmt.Printf("elevMgr: newMsg got confirmation from transMgr \n")}			
 
 				case message.DELEGATE_ORDER:
@@ -102,21 +79,7 @@ func Start() {
 					} else if !que.IsIdAssigned(transMgr.MyId()) && !que.IsEmpty(){
 						newOrder := que.EarliestNonAssignedOrder() // switch with calculate from twoelevtest
 						if(DEBUG_ELEVMGR){fmt.Printf("elevMgr: did not get delegation and got no destination, get new\n\n")}
-						if newOrder != NONVALID_BUTTON {
-							cost := localElev.GetCost(newOrder)
-							if cost < fsm.INF_COST {
-								canTakeAtOnce := transMgr.RequestOrder(newOrder, cost)
-								if canTakeAtOnce{ //DENNE PRØVER Å LØSE PROBLEMET LENGRE NED MED REQUEST FØR COST OG MOTSATT, VED Å TILLATE UBUFFRET FRA TRANS: LITT ADD HOOK
-									que.AssignOrderToId(newOrder, transMgr.MyId())
-									localElev.NewDestination(newOrder.Floor)
-								}
-							} else {
-								if(DEBUG_ELEVMGR){fmt.Printf("elevMgr: inf cost when received DELEGATE_ORDER and i got no order\n")}
-							}
-						} else {
-							if(DEBUG_ELEVMGR){fmt.Printf("elevMgr: que returned NONVALID_BUTTON while !que.IsEmpty() => all orders taken\n")}
-						}
-						
+						ifLowCostThenRequest(newOrder)						
 					}
 				case message.REMOVE_ORDER:
 					if(DEBUG_ELEVMGR){fmt.Printf("elevMgr: got REMOVE_ORDER from trans on floor %d, removing both\n", newMsg.Button.Floor)}
@@ -133,35 +96,24 @@ func Start() {
 					if !que.HasOrder(order){
 						if(DEBUG_ELEVMGR){fmt.Printf("elevMgr: SENDTE NÅ COST PÅ EN ORDRE SOM IKKE ER I KØEN ENDA...\n\n") }//DEBUG ONLY
 					}
-					transMgr.SendCost(order, cost) /*MULIG DETTE ER ET PROBLEM!!!! DEN ANDRE HEISEN REKKER Å PULLE COSTEN FØR DENNE HEISEN HAR LAGT ORDREN I KØEN.
-													SÅ DENNE SENDER EN REQUEST SOM GJØR ORDREN FERDIG DELEGERT FØR DEN SENDER DENNE*/
+					transMgr.SendCost(order, cost)
+				case message.UNASSIGN_ORDER:
+					unassignId := newMsg.ElevatorId
+					fmt.Printf("elevMgr: got UNASSIGN_ORDER from trans on id %d\n", unassignId)
+					if unassignId != transMgr.MyId(){
+						que.UnassignOrdersToID(unassignId)
+						newOrder := que.EarliestNonAssignedOrder() // switch with calculate from twoelevtest
+						ifLowCostThenRequest(newOrder)
+
+					} else{
+						fmt.Printf("elevMgr: ERROR Id is mine, so i did not unassign my orders\n")
+					}
 				default:							
 					if(DEBUG_ELEVMGR){fmt.Printf("Unhandeled MessageId: %+v", newMsg)}
 				}
-
-			/*default:
-				if que.IsEmpty(){
-					//fmt.Printf("Que is empty... \n")
-					time.Sleep(time.Millisecond*100)
-				} else if localElev.State()== fsm.STATE_IDLE {
-					nextOrder := que.EarliestNonAssignedOrder()
-					if nextOrder != NONVALID_BUTTON{
-
-						//DENNNE MÅ SJEKKE AT VI ER ALENE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-						localElev.NewDestination(nextOrder.Floor)
-						fmt.Printf("elevMgr default  made me take%+v \n", nextOrder)
-					} else{
-						fmt.Printf("All orders assigned... \n")
-					}
-					time.Sleep(time.Millisecond*100)
-
-				}
-			*/	
+			}
 		}
-	}
-
 	}()
-
 }
 
 

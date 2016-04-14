@@ -65,8 +65,8 @@ func (que *orderQue_t) RemoveOrdersOnFloor(floor int){
 	que.Print()
 }
 
-func (que *orderQue_t) UnassignOrderToID(id int){
-	if(DEBUG_QUE){fmt.Printf("que: UnassignOrderToId = %d\n",id)}
+func (que *orderQue_t) UnassignOrdersToID(id int){
+	if(DEBUG_QUE){fmt.Printf("que: UnassignOrdersToId = %d\n",id)}
 	for floor := FIRST_FLOOR; floor < N_FLOORS; floor++ {
 		for orderType := 0; orderType < N_BUTTON_TYPES; orderType++ {
 			if que[floor][orderType].assignedToID == id{
@@ -82,7 +82,7 @@ func (que *orderQue_t) AssignOrderToId(button Button_t, id int) bool{
 		return false
 	}
 
-	que.UnassignOrderToID(id)
+	que.UnassignOrdersToID(id)
 	if(DEBUG_QUE){fmt.Printf("que: AssignOrder = %+v, ToId = %d\n",button,id)}
 	que[button.Floor][button.ButtonType].assignedToID = id
 

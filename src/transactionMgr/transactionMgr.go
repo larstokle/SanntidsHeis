@@ -22,7 +22,8 @@ type costAndToId_t struct {
 }
 
 type transactionMgr_t struct {
-	Receive         chan message.Message_t //bad naming. it is the msg to elevMgr
+	ToParent        chan message.Message_t
+	ProceedOk		chan bool
 	netReceive      chan message.Message_t
 	netSend         chan message.Message_t
 	heartbeatTimers map[int]*time.Timer
@@ -34,7 +35,8 @@ type transactionMgr_t struct {
 
 func New() *transactionMgr_t {
 	var transMgr transactionMgr_t
-	transMgr.Receive = make(chan message.Message_t)
+	transMgr.ToParent = make(chan message.Message_t)
+	transMgr.ProceedOk = make(chan bool) 
 	transMgr.netSend, _ = network.MakeSender(broadCastAddr + port)
 	transMgr.netReceive, _ = network.MakeReceiver(port)
 	transMgr.heartbeatTimers = make(map[int]*time.Timer)
@@ -57,12 +59,12 @@ func New() *transactionMgr_t {
 				if receivedData.Source != transMgr.myId {
 					if(DEBUG_TRNSMGR){fmt.Printf("transMgr: Received NEW_ORDER: %+v\n", receivedData)}
 					if(DEBUG_CHANNELS){fmt.Println("transMgr: NEW_ORDER Receive could hang")}
-					transMgr.Receive <- receivedData
+					transMgr.ToParent <- receivedData
 					if(DEBUG_CHANNELS){fmt.Println("transMgr: NEW_ORDER Receive didn't hang")}
 					
 					if(DEBUG_TRNSMGR){fmt.Printf("transMgr: WAIT FOR CONFIRMATION FROM ELEVMGR\n")}
 					if(DEBUG_CHANNELS){fmt.Println("transMgr: NEW_ORDER wait for CONFIRMATION could hang")}
-					<-transMgr.Receive //WAIT FOR CONFIRMATION FROM ELEVMGR! COULD USE TIMER, BUT THIST IS PROBABLY BETTER
+					<-transMgr.ProceedOk //WAIT FOR CONFIRMATION FROM ELEVMGR! COULD USE TIMER, BUT THIST IS PROBABLY BETTER
 					if(DEBUG_CHANNELS){fmt.Println("transMgr: NEW_ORDER wait for CONFIRMATION didn't hang")}
 					if(DEBUG_TRNSMGR){fmt.Printf("transMgr: GOT CONFIRMATION FROM ELEVMGR\n")}
 				}
@@ -106,7 +108,7 @@ func New() *transactionMgr_t {
 						if(DEBUG_TRNSMGR){fmt.Printf("tranMgr: allDelegatedEqual = true. delegated order %+v to elevator %d\n", order, transMgr.delegation[order][transMgr.myId].toId)}
 						
 						if(DEBUG_CHANNELS){fmt.Println("transMgr: DELEGATE_ORDER allDelegatedEqual = true could hang")}
-						transMgr.Receive <- message.Message_t{MessageId: message.DELEGATE_ORDER, Button: order, ElevatorId: transMgr.delegation[order][transMgr.myId].toId}
+						transMgr.ToParent <- message.Message_t{MessageId: message.DELEGATE_ORDER, Button: order, ElevatorId: transMgr.delegation[order][transMgr.myId].toId}
 						if(DEBUG_CHANNELS){fmt.Println("transMgr: DELEGATE_ORDER allDelegatedEqual = true didn't hang")}
 						transMgr.delegation[order] = nil
 					}
@@ -120,7 +122,7 @@ func New() *transactionMgr_t {
 					if(DEBUG_TRNSMGR){fmt.Printf("transMgr: Received REMOVE_ORDER: %+v\n", receivedData)}
 
 					if(DEBUG_CHANNELS){fmt.Println("transMgr: REMOVE_ORDER could hang")}
-					transMgr.Receive <- receivedData
+					transMgr.ToParent <- receivedData
 					if(DEBUG_CHANNELS){fmt.Println("transMgr: REMOVE_ORDER didn't hang")}
 
 
@@ -131,6 +133,10 @@ func New() *transactionMgr_t {
 					order.ButtonType = DOWN
 					delete(transMgr.delegation, order)
 					transMgr.delegationMutex.Unlock()
+				}
+			case message.UNASSIGN_ORDER:
+				if receivedData.Source != transMgr.myId {
+					transMgr.ToParent <- receivedData
 				}
 			default:
 				if(DEBUG_TRNSMGR){fmt.Printf("transMgr: received unhandled MessageId \n", receivedData.MessageId)}
@@ -176,6 +182,11 @@ func (transMgr *transactionMgr_t) RemoveElevator(id int) {
 	delete(transMgr.heartbeatTimers, id)
 	transMgr.heartbeatMutex.Unlock()
 	if(DEBUG_TRNSMGR){fmt.Printf("===Lost Heartbeat ID: %+v, now have %d elevs===\n", id, transMgr.nElevatorsOnline())}
+	if id != transMgr.myId{
+		transMgr.ToParent <- message.Message_t{Source: transMgr.myId, MessageId: message.UNASSIGN_ORDER, ElevatorId: id}
+	} else {
+		fmt.Printf("===transMgr: Lost my own heartbeat, all alone in the world")
+	}
 }
 
 func (transMgr *transactionMgr_t) DelegateOrder(order Button_t) {
@@ -200,15 +211,28 @@ func (transMgr *transactionMgr_t) DelegateOrder(order Button_t) {
 	if(DEBUG_TRNSMGR){fmt.Printf("transMgr: Delegate order %+v to id %d\n", order, lowestCostId)}
 }
 
-func (transMgr *transactionMgr_t) RequestOrder(order Button_t, cost int) bool{ //BYGD OM TIL Å RETURNERE TRUE OM HEIS KAN TA DEN MED EN GANG: UNGÅR KANALBRUK OG DERMED LOCK
+func (transMgr *transactionMgr_t) RequestOrder(order Button_t, cost int) /*bool*/{
+	independentSender := func(){//SUPERHACK!! OK? let function return before sending on channel
+			if(DEBUG_CHANNELS){fmt.Println("transMgr: RequestOrder could hang")}
+			transMgr.ToParent <- message.Message_t{MessageId: message.DELEGATE_ORDER, Button: order, ElevatorId: transMgr.myId}
+			if(DEBUG_CHANNELS){fmt.Println("transMgr: RequestOrder didn't hang")}
+		}
 	if transMgr.nElevatorsOnline() <= 1{
-		if(DEBUG_TRNSMGR){fmt.Printf("transMgr: RequestOrder on %+v with cost %d, but no other elevs\n", order, cost)}
-	 return true //transMgr.Receive <- message.Message_t{MessageId: message.DELEGATE_ORDER, Button: order, ElevatorId: transMgr.myId}
-	} else{
-		if(DEBUG_TRNSMGR){fmt.Printf("transMgr: RequestOrder on %+v with cost %d and %d elevs online\n", order, cost, transMgr.nElevatorsOnline())}
+		if(DEBUG_TRNSMGR){fmt.Printf("transMgr: Request ANY Order on %+v with cost %d and %d elevs online, TAKE IT\n", order, cost, transMgr.nElevatorsOnline())}
+		//return true
+		go independentSender()
+	} else if order.ButtonType == CMD {
+		if(DEBUG_TRNSMGR){fmt.Printf("transMgr: Request CMD Order on %+v with cost %d and %d elevs online, TAKE IT\n", order, cost, transMgr.nElevatorsOnline())}
+		go independentSender()
+
+		transMgr.netSend <- message.Message_t{Source: transMgr.myId, MessageId: message.UNASSIGN_ORDER, ElevatorId: transMgr.myId}
+
+	} else {
+		if(DEBUG_TRNSMGR){fmt.Printf("transMgr: Request UP/DOWN Order on %+v with cost %d and %d elevs online\n", order, cost, transMgr.nElevatorsOnline())}
 		transMgr.SendCost(order, cost)
-		return false
+		//return false
 	}
+
 }
 
 func (transMgr *transactionMgr_t) MyId() int {
@@ -216,6 +240,10 @@ func (transMgr *transactionMgr_t) MyId() int {
 }
 
 func (transMgr *transactionMgr_t) NewOrder(order Button_t) {
+	if order.ButtonType == CMD{
+		if(DEBUG_TRNSMGR){fmt.Printf("transMgr: did not send new order (%+v) since ButtonType == CMD\n", order)}
+		return
+	}
 	numElevs := transMgr.nElevatorsOnline()
 	if numElevs > 1{
 		if(DEBUG_TRNSMGR){fmt.Printf("transMgr: sending new order on network = %+v to in total %d elevs\n", order, numElevs)}
@@ -264,7 +292,7 @@ func (transMgr *transactionMgr_t) handleSetCost(order Button_t, cost int, id int
 		transMgr.delegationMutex.Unlock()
 		if id != transMgr.myId{
 			if(DEBUG_CHANNELS){fmt.Println("transMgr: handleSetCost Receive could hang")}
-			transMgr.Receive <- message.Message_t{MessageId: message.COST, Button: order}
+			transMgr.ToParent <- message.Message_t{MessageId: message.COST, Button: order}
 			if(DEBUG_CHANNELS){fmt.Println("transMgr: handleSetCost Receive didn't hang")}
 		}
 	} else if oldCostAndToId, present := transMgr.delegation[order][id]; !present {

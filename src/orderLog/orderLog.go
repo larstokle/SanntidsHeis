@@ -22,6 +22,7 @@ func WriteInternalOrders(orders []byte) {
 	check(err)
 	defer f.Close()
 	ret,err := f.Write(orders)
+	_ = ret
 	check(err)
 }
 
