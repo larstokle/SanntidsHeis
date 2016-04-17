@@ -43,12 +43,16 @@ func (transMgr *transactionMgr_t) RequestOrder(order Button_t, cost int) /*bool*
 
 	if transMgr.nElevatorsOnline() <= 1{
 		if(DEBUG_TRNSMGR){fmt.Printf("transMgr: Request ANY Order on %+v with cost %d and %d elevs online, TAKE IT\n", order, cost, transMgr.nElevatorsOnline())}
-
+//==============================================================================
+		//DETTE MÅ FIKSES!
 		go independentSender()
+//==============================================================================
 	} else if order.ButtonType == CMD {
 		if(DEBUG_TRNSMGR){fmt.Printf("transMgr: Request CMD Order on %+v with cost %d and %d elevs online, TAKE IT\n", order, cost, transMgr.nElevatorsOnline())}
+//==============================================================================
+		//DETTE MÅ FIKSES!
 		go independentSender()
-
+//==============================================================================
 		transMgr.netSend <- message.Message_t{Source: transMgr.myId, MessageId: message.UNASSIGN_ORDER, ElevatorId: transMgr.myId}
 
 	} else {

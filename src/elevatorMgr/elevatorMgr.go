@@ -23,7 +23,7 @@ func Start() {
 	loggedQue := orderque.ReadFromLog()
 	que.SyncInternal(loggedQue)
 	que.SyncExternal(loggedQue)
-	que.UnassignAllOrders()
+	//que.UnassignAllOrders() 			//WTF???
 	que.Print()
 
 	retryTimer := time.NewTimer(time.Second*5)
@@ -97,6 +97,7 @@ func Start() {
 				case message.UNASSIGN_ORDER:
 					unassignId := newMsg.ElevatorId
 					if(DEBUG_ELEVMGR){fmt.Printf("elevMgr: got UNASSIGN_ORDER from trans on id %d\n", unassignId)}
+					
 					if unassignId != transMgr.MyId(){
 						que.UnassignOrdersToID(unassignId)
 					} else{
