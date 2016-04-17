@@ -2,8 +2,6 @@ package globals
 
 import "strconv"
 
-
-
 const (
 	N_FLOORS       = 4
 	N_BUTTON_TYPES = 3
@@ -13,30 +11,26 @@ const (
 	TOP_FLOOR   = N_FLOORS - 1
 
 	NONLEGAL_ID = -1
-
-
-
 )
 
 type Direction_t int32
 
-const(
+const (
 	DIR_DOWN = -1
 	DIR_STOP = 0
 	DIR_UP   = 1
 )
 
 type Button_t struct {
-	Floor     int
+	Floor      int
 	ButtonType int
 }
 
-const(
-	UP    = iota
-	DOWN         
-	CMD          
+const (
+	UP = iota
+	DOWN
+	CMD
 )
-
 
 var buttonTypes = [...]string{
 	"Up",
@@ -44,12 +38,11 @@ var buttonTypes = [...]string{
 	"Command",
 }
 
-
 func (btn Button_t) String() string {
-	
-	if btn.ButtonType < len(buttonTypes){
+
+	if btn.ButtonType < len(buttonTypes) {
 		return "{Floor:" + strconv.Itoa(btn.Floor) + ", Type: " + buttonTypes[btn.ButtonType] + "}"
-	}else{
+	} else {
 		return "{Floor:" + strconv.Itoa(btn.Floor) + ", Type unknown: " + strconv.Itoa(btn.ButtonType) + "}"
 	}
 }
@@ -57,11 +50,8 @@ func (btn Button_t) String() string {
 var NONVALID_BUTTON = Button_t{FIRST_FLOOR, DOWN}
 var NONVALID_BUTTON2 = Button_t{TOP_FLOOR, UP}
 
-var DEBUG_TRNSMGR bool = false
-var DEBUG_ELEVMGR bool = false
-var DEBUG_FSM bool = false
-var DEBUG_QUE bool = false
-var DEBUG_CHANNELS bool = false
-
-
-
+var DEBUG_TRNSMGR bool = true
+var DEBUG_ELEVMGR bool = true
+var DEBUG_FSM bool = true
+var DEBUG_QUE bool = true
+var DEBUG_CHANNELS bool = true

@@ -165,17 +165,6 @@ func New() *transactionMgr_t {
 	return &transMgr
 }
 
-/*func (transMgr transactionMgr_t) startHeartbeat() { // MOVED TO AVOID TICKING WHEN HANG
-	go func() {
-		for {
-			//if(DEBUG_TRNSMGR){fmt.Printf("Sending Heartbeat: %+v \n", beat)}
-
-			transMgr.netSend <- message.Message_t{Source: transMgr.myId, MessageId: message.HEARTBEAT}
-			time.Sleep(time.Millisecond * 500)
-		}
-	}()
-}*/
-
 func (transMgr *transactionMgr_t) newHeartBeat(beat Heartbeat_t) {
 	transMgr.heartbeatMutex.Lock()
 	if _, exists := transMgr.heartbeatTimers[beat.Id]; exists {
