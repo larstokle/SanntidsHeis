@@ -1,0 +1,365 @@
+=========================== ELEVATOR STARTUP ===========================
+
+eventmgr: CheckFloorSignal started
+
+fsm: New floor reached= 1
+fsm: Going idle in floor =  1
+fsm: init done NewElevator returned
+
+eventmgr: CheckButtons started
+
+que: init done NewOrderQue returned
+
+transMgr: init done entering loop
+que: init done NewOrderQue returned
+
+===Got New Heartbeat ID: {Id:146}, now have 1 elevs===
+elevMgr: init done entering loop
+
+=========================== ELEVATOR STARTED ===========================
+
+
+
+elevMgr: newMsg case from transMgr = {Source: 141, ElevatorId: 0, MessageId: SYNC, Button: {Floor:0, Type: Up}, Cost: 0}
+elevMgr: got SYNC from trans from elevator 141
+elevMgr: Requesting order {Floor:1, Type: Down}
+transMgr: Request ANY Order on {Floor:1, Type: Down} with cost 0 and 1 elevs online, TAKE IT
+elevMgr: newMsg case from transMgr = {Source: 0, ElevatorId: 146, MessageId: DELEGATE_ORDER, Button: {Floor:1, Type: Down}, Cost: 0}
+elevMgr: got DELEGATE_ORDER from trans on order {Floor:1, Type: Down} to 146
+que: UnassignOrdersToId = 146
+que: AssignOrder = {Floor:1, Type: Down}, ToId = 146
+fsm: new destination = 1
+fsm: Destination reached
+fsm: Door Opening in floor = 1
+elevMgr: floorDone case from fsm = 1
+que: RemoveOrdersOnFloor = 1
+que: RemoveOrder = {Floor:1, Type: Up}
+que: RemoveOrder = {Floor:1, Type: Down}
+que: RemoveOrder = {Floor:1, Type: Command}
+Remaining orders: 
+orderQue_t:
+	Floor: 0
+		 type: 0: has order = true,last Changed: = 2016-04-16 21:13:09.67290852 +0200 CEST
+		 type: 1: has order = false,last Changed: = 0001-01-01 00:00:00 +0000 UTC
+		 type: 2: has order = false,last Changed: = 2016-04-16 21:00:32.395513862 +0200 CEST
+	Floor: 1
+		 type: 0: has order = false,last Changed: = 2016-04-16 21:13:27.273022197 +0200 CEST
+		 type: 1: has order = false,last Changed: = 2016-04-16 21:13:27.273416438 +0200 CEST
+		 type: 2: has order = false,last Changed: = 2016-04-16 21:00:26.617224743 +0200 CEST
+	Floor: 2
+		 type: 0: has order = true,last Changed: = 2016-04-16 21:13:20.488533124 +0200 CEST
+		 type: 1: has order = true,last Changed: = 2016-04-16 21:13:20.488866705 +0200 CEST
+		 type: 2: has order = false,last Changed: = 2016-04-16 20:55:20.272832867 +0200 CEST
+	Floor: 3
+		 type: 0: has order = false,last Changed: = 0001-01-01 00:00:00 +0000 UTC
+		 type: 1: has order = false,last Changed: = 2016-04-16 21:13:26.975577116 +0200 CEST
+		 type: 2: has order = false,last Changed: = 2016-04-16 21:02:48.265087268 +0200 CEST
+
+transMgr: sending remove order (floor) on network = 1
+elevMgr: floorDone case done = 1
+elevMgr: Requesting order {Floor:2, Type: Down}
+transMgr: Request ANY Order on {Floor:2, Type: Down} with cost 1 and 1 elevs online, TAKE IT
+elevMgr: newMsg case from transMgr = {Source: 0, ElevatorId: 146, MessageId: DELEGATE_ORDER, Button: {Floor:2, Type: Down}, Cost: 0}
+elevMgr: got DELEGATE_ORDER from trans on order {Floor:2, Type: Down} to 146
+que: UnassignOrdersToId = 146
+que: AssignOrder = {Floor:2, Type: Down}, ToId = 146
+fsm: new destination = 2
+===Got New Heartbeat ID: {Id:150}, now have 2 elevs===
+elevMgr: newMsg case from transMgr = {Source: 0, ElevatorId: 0, MessageId: HEARTBEAT, Button: {Floor:0, Type: Up}, Cost: 0}
+elevMgr: got HEARTBEAT from trans, Encoding que
+transMgr: SendSync Sending que
+===Got New Heartbeat ID: {Id:141}, now have 3 elevs===
+elevMgr: newMsg case from transMgr = {Source: 0, ElevatorId: 0, MessageId: HEARTBEAT, Button: {Floor:0, Type: Up}, Cost: 0}
+elevMgr: got HEARTBEAT from trans, Encoding que
+transMgr: SendSync Sending que
+transMgr: Received NEW_ORDER: {Source: 141, ElevatorId: 0, MessageId: NEW_ORDER, Button: {Floor:1, Type: Down}, Cost: 0}
+transMgr: WAIT FOR CONFIRMATION FROM ELEVMGR
+elevMgr: newMsg case from transMgr = {Source: 141, ElevatorId: 0, MessageId: NEW_ORDER, Button: {Floor:1, Type: Down}, Cost: 0}
+elevMgr: newOrder from transMgr = {Floor:1, Type: Down}
+que: AddOrder = {Floor:1, Type: Down}
+transMgr: GOT CONFIRMATION FROM ELEVMGR
+transMgr: Received NEW_ORDER: {Source: 141, ElevatorId: 0, MessageId: NEW_ORDER, Button: {Floor:1, Type: Up}, Cost: 0}
+transMgr: WAIT FOR CONFIRMATION FROM ELEVMGR
+elevMgr: newMsg case from transMgr = {Source: 141, ElevatorId: 0, MessageId: NEW_ORDER, Button: {Floor:1, Type: Up}, Cost: 0}
+elevMgr: newOrder from transMgr = {Floor:1, Type: Up}
+que: AddOrder = {Floor:1, Type: Up}
+transMgr: GOT CONFIRMATION FROM ELEVMGR
+transMgr: Received NEW_ORDER: {Source: 141, ElevatorId: 0, MessageId: NEW_ORDER, Button: {Floor:3, Type: Down}, Cost: 0}
+transMgr: WAIT FOR CONFIRMATION FROM ELEVMGR
+elevMgr: newMsg case from transMgr = {Source: 141, ElevatorId: 0, MessageId: NEW_ORDER, Button: {Floor:3, Type: Down}, Cost: 0}
+elevMgr: newOrder from transMgr = {Floor:3, Type: Down}
+que: AddOrder = {Floor:3, Type: Down}
+transMgr: GOT CONFIRMATION FROM ELEVMGR
+fsm: Door closing, currentDestination = 2
+fsm: Starting to move in dir = 1 against destination = 2
+
+
+transMgr: Received COST msg on order {Floor:2, Type: Down} from 141 with cost 5 
+transMgr: New delegation sequence on order {Floor:2, Type: Down}, setting cost 5 to id 141
+elevMgr: newMsg case from transMgr = {Source: 0, ElevatorId: 0, MessageId: COST, Button: {Floor:2, Type: Down}, Cost: 0}
+elevMgr: got COST from trans on order, i calculated cost = {2 1} 
+%!(EXTRA int=255)transMgr: sending cost 255 on order {Floor:2, Type: Down} on network
+transMgr: Setting cost on order {Floor:2, Type: Down}, with cost 255 to 146 in existing delegation sequence
+transMgr: No delegation yet, still waiting for 1 other elevs
+elevMgr: Requesting order {Floor:2, Type: Up}
+transMgr: Request UP/DOWN Order on {Floor:2, Type: Up} with cost 5 and 3 elevs online
+transMgr: sending cost 5 on order {Floor:2, Type: Up} on network
+transMgr: New delegation sequence on order {Floor:2, Type: Up}, setting cost 5 to id 146
+transMgr: Received COST msg on order {Floor:2, Type: Up} from 141 with cost 255 
+transMgr: Setting cost on order {Floor:2, Type: Up}, with cost 255 to 141 in existing delegation sequence
+transMgr: No delegation yet, still waiting for 1 other elevs
+transMgr: Received COST msg on order {Floor:2, Type: Down} from 141 with cost 5 
+transMgr: ERROR! got multiple cost on order {Floor:2, Type: Down} from 141. oldCostAndToId = {5 -1}, newCost got = 5
+transMgr: Received COST msg on order {Floor:2, Type: Down} from 141 with cost 5 
+transMgr: ERROR! got multiple cost on order {Floor:2, Type: Down} from 141. oldCostAndToId = {5 -1}, newCost got = 5
+elevMgr: Requesting order {Floor:2, Type: Up}
+transMgr: Request UP/DOWN Order on {Floor:2, Type: Up} with cost 5 and 3 elevs online
+transMgr: sending cost 5 on order {Floor:2, Type: Up} on network
+transMgr: ERROR! got multiple cost on order {Floor:2, Type: Up} from 146. oldCostAndToId = {5 -1}, newCost got = 5
+transMgr: Received REMOVE_ORDER: {Source: 141, ElevatorId: 0, MessageId: REMOVE_ORDER, Button: {Floor:2, Type: Up}, Cost: 0}
+elevMgr: newMsg case from transMgr = {Source: 141, ElevatorId: 0, MessageId: REMOVE_ORDER, Button: {Floor:2, Type: Up}, Cost: 0}
+elevMgr: got REMOVE_ORDER from trans on floor 2, removing both
+que: RemoveOrder = {Floor:2, Type: Up}
+que: RemoveOrder = {Floor:2, Type: Down}
+elevMgr: newMsg case from transMgr = {Source: 141, ElevatorId: 141, MessageId: UNASSIGN_ORDER, Button: {Floor:0, Type: Up}, Cost: 0}
+elevMgr: got UNASSIGN_ORDER from trans on id 141
+que: UnassignOrdersToId = 141
+fsm: New floor reached= 2
+fsm: Destination reached
+fsm: Door Opening in floor = 2
+elevMgr: floorDone case from fsm = 2
+que: RemoveOrdersOnFloor = 2
+que: RemoveOrder = {Floor:2, Type: Up}
+que: RemoveOrder = {Floor:2, Type: Down}
+que: RemoveOrder = {Floor:2, Type: Command}
+Remaining orders: 
+orderQue_t:
+	Floor: 0
+		 type: 0: has order = true,last Changed: = 2016-04-16 21:13:09.67290852 +0200 CEST
+		 type: 1: has order = false,last Changed: = 0001-01-01 00:00:00 +0000 UTC
+		 type: 2: has order = false,last Changed: = 2016-04-16 21:00:32.395513862 +0200 CEST
+	Floor: 1
+		 type: 0: has order = true,last Changed: = 2016-04-16 21:13:28.675326602 +0200 CEST
+		 type: 1: has order = true,last Changed: = 2016-04-16 21:13:28.614844783 +0200 CEST
+		 type: 2: has order = false,last Changed: = 2016-04-16 21:00:26.617224743 +0200 CEST
+	Floor: 2
+		 type: 0: has order = false,last Changed: = 2016-04-16 21:13:32.29184387 +0200 CEST
+		 type: 1: has order = false,last Changed: = 2016-04-16 21:13:32.292258943 +0200 CEST
+		 type: 2: has order = false,last Changed: = 2016-04-16 20:55:20.272832867 +0200 CEST
+	Floor: 3
+		 type: 0: has order = false,last Changed: = 0001-01-01 00:00:00 +0000 UTC
+		 type: 1: has order = true,last Changed: = 2016-04-16 21:13:30.068543398 +0200 CEST
+		 type: 2: has order = false,last Changed: = 2016-04-16 21:02:48.265087268 +0200 CEST
+
+transMgr: sending remove order (floor) on network = 2
+elevMgr: floorDone case done = 2
+elevMgr: Requesting order {Floor:3, Type: Down}
+transMgr: Request UP/DOWN Order on {Floor:3, Type: Down} with cost 1 and 3 elevs online
+transMgr: sending cost 1 on order {Floor:3, Type: Down} on network
+transMgr: New delegation sequence on order {Floor:3, Type: Down}, setting cost 1 to id 146
+transMgr: Received COST msg on order {Floor:1, Type: Down} from 141 with cost 5 
+transMgr: New delegation sequence on order {Floor:1, Type: Down}, setting cost 5 to id 141
+transMgr: Received COST msg on order {Floor:3, Type: Down} from 141 with cost 255 
+transMgr: Setting cost on order {Floor:3, Type: Down}, with cost 255 to 141 in existing delegation sequence
+transMgr: No delegation yet, still waiting for 1 other elevs
+transMgr: Received COST msg on order {Floor:1, Type: Down} from 141 with cost 5 
+transMgr: ERROR! got multiple cost on order {Floor:1, Type: Down} from 141. oldCostAndToId = {5 -1}, newCost got = 5
+elevMgr: newMsg case from transMgr = {Source: 0, ElevatorId: 0, MessageId: COST, Button: {Floor:1, Type: Down}, Cost: 0}
+elevMgr: got COST from trans on order, i calculated cost = {1 1} 
+%!(EXTRA int=1)transMgr: sending cost 1 on order {Floor:1, Type: Down} on network
+transMgr: Setting cost on order {Floor:1, Type: Down}, with cost 1 to 146 in existing delegation sequence
+transMgr: No delegation yet, still waiting for 1 other elevs
+elevMgr: Requesting order {Floor:3, Type: Down}
+transMgr: Request UP/DOWN Order on {Floor:3, Type: Down} with cost 1 and 3 elevs online
+transMgr: sending cost 1 on order {Floor:3, Type: Down} on network
+transMgr: ERROR! got multiple cost on order {Floor:3, Type: Down} from 146. oldCostAndToId = {1 -1}, newCost got = 1
+transMgr: Received COST msg on order {Floor:1, Type: Down} from 141 with cost 5 
+transMgr: ERROR! got multiple cost on order {Floor:1, Type: Down} from 141. oldCostAndToId = {5 -1}, newCost got = 5
+transMgr: Received COST msg on order {Floor:1, Type: Down} from 141 with cost 5 
+transMgr: ERROR! got multiple cost on order {Floor:1, Type: Down} from 141. oldCostAndToId = {5 -1}, newCost got = 5
+transMgr: Received COST msg on order {Floor:1, Type: Down} from 141 with cost 5 
+transMgr: ERROR! got multiple cost on order {Floor:1, Type: Down} from 141. oldCostAndToId = {5 -1}, newCost got = 5
+transMgr: Received COST msg on order {Floor:1, Type: Down} from 141 with cost 5 
+transMgr: ERROR! got multiple cost on order {Floor:1, Type: Down} from 141. oldCostAndToId = {5 -1}, newCost got = 5
+transMgr: Received NEW_ORDER: {Source: 141, ElevatorId: 0, MessageId: NEW_ORDER, Button: {Floor:2, Type: Down}, Cost: 0}
+transMgr: WAIT FOR CONFIRMATION FROM ELEVMGR
+elevMgr: newMsg case from transMgr = {Source: 141, ElevatorId: 0, MessageId: NEW_ORDER, Button: {Floor:2, Type: Down}, Cost: 0}
+elevMgr: newOrder from transMgr = {Floor:2, Type: Down}
+que: AddOrder = {Floor:2, Type: Down}
+elevMgr: Requesting order {Floor:2, Type: Down}
+transMgr: Request UP/DOWN Order on {Floor:2, Type: Down} with cost 0 and 3 elevs online
+transMgr: sending cost 0 on order {Floor:2, Type: Down} on network
+transMgr: New delegation sequence on order {Floor:2, Type: Down}, setting cost 0 to id 146
+transMgr: GOT CONFIRMATION FROM ELEVMGR
+transMgr: Received COST msg on order {Floor:1, Type: Down} from 141 with cost 5 
+transMgr: ERROR! got multiple cost on order {Floor:1, Type: Down} from 141. oldCostAndToId = {5 -1}, newCost got = 5
+transMgr: Received COST msg on order {Floor:2, Type: Down} from 141 with cost 255 
+transMgr: Setting cost on order {Floor:2, Type: Down}, with cost 255 to 141 in existing delegation sequence
+transMgr: No delegation yet, still waiting for 1 other elevs
+transMgr: Received COST msg on order {Floor:1, Type: Down} from 141 with cost 5 
+transMgr: ERROR! got multiple cost on order {Floor:1, Type: Down} from 141. oldCostAndToId = {5 -1}, newCost got = 5
+transMgr: Received NEW_ORDER: {Source: 141, ElevatorId: 0, MessageId: NEW_ORDER, Button: {Floor:2, Type: Up}, Cost: 0}
+transMgr: WAIT FOR CONFIRMATION FROM ELEVMGR
+elevMgr: newMsg case from transMgr = {Source: 141, ElevatorId: 0, MessageId: NEW_ORDER, Button: {Floor:2, Type: Up}, Cost: 0}
+elevMgr: newOrder from transMgr = {Floor:2, Type: Up}
+que: AddOrder = {Floor:2, Type: Up}
+elevMgr: Requesting order {Floor:2, Type: Down}
+transMgr: Request UP/DOWN Order on {Floor:2, Type: Down} with cost 0 and 3 elevs online
+transMgr: sending cost 0 on order {Floor:2, Type: Down} on network
+transMgr: ERROR! got multiple cost on order {Floor:2, Type: Down} from 146. oldCostAndToId = {0 -1}, newCost got = 0
+transMgr: GOT CONFIRMATION FROM ELEVMGR
+transMgr: Received COST msg on order {Floor:1, Type: Down} from 141 with cost 5 
+transMgr: ERROR! got multiple cost on order {Floor:1, Type: Down} from 141. oldCostAndToId = {5 -1}, newCost got = 5
+transMgr: Received COST msg on order {Floor:1, Type: Down} from 141 with cost 5 
+transMgr: ERROR! got multiple cost on order {Floor:1, Type: Down} from 141. oldCostAndToId = {5 -1}, newCost got = 5
+fsm: Door closing, currentDestination = -1
+fsm: Going idle in floor =  2
+transMgr: Received COST msg on order {Floor:1, Type: Down} from 141 with cost 5 
+transMgr: ERROR! got multiple cost on order {Floor:1, Type: Down} from 141. oldCostAndToId = {5 -1}, newCost got = 5
+transMgr: Received COST msg on order {Floor:1, Type: Down} from 141 with cost 5 
+transMgr: ERROR! got multiple cost on order {Floor:1, Type: Down} from 141. oldCostAndToId = {5 -1}, newCost got = 5
+transMgr: Received COST msg on order {Floor:1, Type: Down} from 141 with cost 5 
+transMgr: ERROR! got multiple cost on order {Floor:1, Type: Down} from 141. oldCostAndToId = {5 -1}, newCost got = 5
+transMgr: Received COST msg on order {Floor:1, Type: Down} from 141 with cost 5 
+transMgr: ERROR! got multiple cost on order {Floor:1, Type: Down} from 141. oldCostAndToId = {5 -1}, newCost got = 5
+transMgr: Received COST msg on order {Floor:1, Type: Down} from 141 with cost 5 
+transMgr: ERROR! got multiple cost on order {Floor:1, Type: Down} from 141. oldCostAndToId = {5 -1}, newCost got = 5
+transMgr: Received COST msg on order {Floor:1, Type: Down} from 141 with cost 5 
+transMgr: ERROR! got multiple cost on order {Floor:1, Type: Down} from 141. oldCostAndToId = {5 -1}, newCost got = 5
+elevMgr: Requesting order {Floor:2, Type: Down}
+transMgr: Request UP/DOWN Order on {Floor:2, Type: Down} with cost 0 and 3 elevs online
+transMgr: sending cost 0 on order {Floor:2, Type: Down} on network
+transMgr: ERROR! got multiple cost on order {Floor:2, Type: Down} from 146. oldCostAndToId = {0 -1}, newCost got = 0
+transMgr: Received COST msg on order {Floor:1, Type: Down} from 141 with cost 5 
+transMgr: ERROR! got multiple cost on order {Floor:1, Type: Down} from 141. oldCostAndToId = {5 -1}, newCost got = 5
+transMgr: Received REMOVE_ORDER: {Source: 141, ElevatorId: 0, MessageId: REMOVE_ORDER, Button: {Floor:1, Type: Up}, Cost: 0}
+elevMgr: newMsg case from transMgr = {Source: 141, ElevatorId: 0, MessageId: REMOVE_ORDER, Button: {Floor:1, Type: Up}, Cost: 0}
+elevMgr: got REMOVE_ORDER from trans on floor 1, removing both
+que: RemoveOrder = {Floor:1, Type: Up}
+que: RemoveOrder = {Floor:1, Type: Down}
+elevMgr: Requesting order {Floor:2, Type: Down}
+transMgr: Request UP/DOWN Order on {Floor:2, Type: Down} with cost 0 and 3 elevs online
+transMgr: sending cost 0 on order {Floor:2, Type: Down} on network
+transMgr: ERROR! got multiple cost on order {Floor:2, Type: Down} from 146. oldCostAndToId = {0 -1}, newCost got = 0
+elevMgr: newMsg case from transMgr = {Source: 141, ElevatorId: 141, MessageId: UNASSIGN_ORDER, Button: {Floor:0, Type: Up}, Cost: 0}
+elevMgr: got UNASSIGN_ORDER from trans on id 141
+que: UnassignOrdersToId = 141
+elevMgr: Requesting order {Floor:2, Type: Down}
+transMgr: Request UP/DOWN Order on {Floor:2, Type: Down} with cost 0 and 3 elevs online
+transMgr: sending cost 0 on order {Floor:2, Type: Down} on network
+transMgr: ERROR! got multiple cost on order {Floor:2, Type: Down} from 146. oldCostAndToId = {0 -1}, newCost got = 0
+elevMgr: newMsg case from transMgr = {Source: 141, ElevatorId: 141, MessageId: UNASSIGN_ORDER, Button: {Floor:0, Type: Up}, Cost: 0}
+elevMgr: got UNASSIGN_ORDER from trans on id 141
+que: UnassignOrdersToId = 141
+elevMgr: Requesting order {Floor:2, Type: Down}
+transMgr: Request UP/DOWN Order on {Floor:2, Type: Down} with cost 0 and 3 elevs online
+transMgr: sending cost 0 on order {Floor:2, Type: Down} on network
+transMgr: ERROR! got multiple cost on order {Floor:2, Type: Down} from 146. oldCostAndToId = {0 -1}, newCost got = 0
+elevMgr: newMsg case from transMgr = {Source: 141, ElevatorId: 141, MessageId: UNASSIGN_ORDER, Button: {Floor:0, Type: Up}, Cost: 0}
+elevMgr: got UNASSIGN_ORDER from trans on id 141
+que: UnassignOrdersToId = 141
+elevMgr: Requesting order {Floor:2, Type: Down}
+transMgr: Request UP/DOWN Order on {Floor:2, Type: Down} with cost 0 and 3 elevs online
+transMgr: sending cost 0 on order {Floor:2, Type: Down} on network
+transMgr: ERROR! got multiple cost on order {Floor:2, Type: Down} from 146. oldCostAndToId = {0 -1}, newCost got = 0
+transMgr: Received NEW_ORDER: {Source: 141, ElevatorId: 0, MessageId: NEW_ORDER, Button: {Floor:1, Type: Down}, Cost: 0}
+transMgr: WAIT FOR CONFIRMATION FROM ELEVMGR
+elevMgr: newMsg case from transMgr = {Source: 141, ElevatorId: 0, MessageId: NEW_ORDER, Button: {Floor:1, Type: Down}, Cost: 0}
+elevMgr: newOrder from transMgr = {Floor:1, Type: Down}
+que: AddOrder = {Floor:1, Type: Down}
+elevMgr: Requesting order {Floor:2, Type: Down}
+transMgr: Request UP/DOWN Order on {Floor:2, Type: Down} with cost 0 and 3 elevs online
+transMgr: sending cost 0 on order {Floor:2, Type: Down} on network
+transMgr: ERROR! got multiple cost on order {Floor:2, Type: Down} from 146. oldCostAndToId = {0 -1}, newCost got = 0
+transMgr: GOT CONFIRMATION FROM ELEVMGR
+transMgr: Received NEW_ORDER: {Source: 141, ElevatorId: 0, MessageId: NEW_ORDER, Button: {Floor:1, Type: Up}, Cost: 0}
+transMgr: WAIT FOR CONFIRMATION FROM ELEVMGR
+elevMgr: newMsg case from transMgr = {Source: 141, ElevatorId: 0, MessageId: NEW_ORDER, Button: {Floor:1, Type: Up}, Cost: 0}
+elevMgr: newOrder from transMgr = {Floor:1, Type: Up}
+que: AddOrder = {Floor:1, Type: Up}
+elevMgr: Requesting order {Floor:2, Type: Down}
+transMgr: Request UP/DOWN Order on {Floor:2, Type: Down} with cost 0 and 3 elevs online
+transMgr: sending cost 0 on order {Floor:2, Type: Down} on network
+transMgr: ERROR! got multiple cost on order {Floor:2, Type: Down} from 146. oldCostAndToId = {0 -1}, newCost got = 0
+transMgr: GOT CONFIRMATION FROM ELEVMGR
+elevMgr: Requesting order {Floor:2, Type: Down}
+transMgr: Request UP/DOWN Order on {Floor:2, Type: Down} with cost 0 and 3 elevs online
+transMgr: sending cost 0 on order {Floor:2, Type: Down} on network
+transMgr: ERROR! got multiple cost on order {Floor:2, Type: Down} from 146. oldCostAndToId = {0 -1}, newCost got = 0
+transMgr: Received REMOVE_ORDER: {Source: 141, ElevatorId: 0, MessageId: REMOVE_ORDER, Button: {Floor:0, Type: Up}, Cost: 0}
+elevMgr: newMsg case from transMgr = {Source: 141, ElevatorId: 0, MessageId: REMOVE_ORDER, Button: {Floor:0, Type: Up}, Cost: 0}
+elevMgr: got REMOVE_ORDER from trans on floor 0, removing both
+que: RemoveOrder = {Floor:0, Type: Up}
+que: RemoveOrder = {Floor:0, Type: Down}
+elevMgr: Requesting order {Floor:2, Type: Down}
+transMgr: Request UP/DOWN Order on {Floor:2, Type: Down} with cost 0 and 3 elevs online
+transMgr: sending cost 0 on order {Floor:2, Type: Down} on network
+transMgr: ERROR! got multiple cost on order {Floor:2, Type: Down} from 146. oldCostAndToId = {0 -1}, newCost got = 0
+elevMgr: newMsg case from transMgr = {Source: 141, ElevatorId: 141, MessageId: UNASSIGN_ORDER, Button: {Floor:0, Type: Up}, Cost: 0}
+elevMgr: got UNASSIGN_ORDER from trans on id 141
+que: UnassignOrdersToId = 141
+elevMgr: Requesting order {Floor:2, Type: Down}
+transMgr: Request UP/DOWN Order on {Floor:2, Type: Down} with cost 0 and 3 elevs online
+transMgr: sending cost 0 on order {Floor:2, Type: Down} on network
+transMgr: ERROR! got multiple cost on order {Floor:2, Type: Down} from 146. oldCostAndToId = {0 -1}, newCost got = 0
+elevMgr: Requesting order {Floor:2, Type: Down}
+transMgr: Request UP/DOWN Order on {Floor:2, Type: Down} with cost 0 and 3 elevs online
+transMgr: sending cost 0 on order {Floor:2, Type: Down} on network
+transMgr: ERROR! got multiple cost on order {Floor:2, Type: Down} from 146. oldCostAndToId = {0 -1}, newCost got = 0
+transMgr: Received REMOVE_ORDER: {Source: 141, ElevatorId: 0, MessageId: REMOVE_ORDER, Button: {Floor:1, Type: Up}, Cost: 0}
+elevMgr: newMsg case from transMgr = {Source: 141, ElevatorId: 0, MessageId: REMOVE_ORDER, Button: {Floor:1, Type: Up}, Cost: 0}
+elevMgr: got REMOVE_ORDER from trans on floor 1, removing both
+que: RemoveOrder = {Floor:1, Type: Up}
+que: RemoveOrder = {Floor:1, Type: Down}
+elevMgr: Requesting order {Floor:2, Type: Down}
+transMgr: Request UP/DOWN Order on {Floor:2, Type: Down} with cost 0 and 3 elevs online
+transMgr: sending cost 0 on order {Floor:2, Type: Down} on network
+transMgr: ERROR! got multiple cost on order {Floor:2, Type: Down} from 146. oldCostAndToId = {0 -1}, newCost got = 0
+elevMgr: newMsg case from transMgr = {Source: 141, ElevatorId: 141, MessageId: UNASSIGN_ORDER, Button: {Floor:0, Type: Up}, Cost: 0}
+elevMgr: got UNASSIGN_ORDER from trans on id 141
+que: UnassignOrdersToId = 141
+elevMgr: Requesting order {Floor:2, Type: Down}
+transMgr: Request UP/DOWN Order on {Floor:2, Type: Down} with cost 0 and 3 elevs online
+transMgr: sending cost 0 on order {Floor:2, Type: Down} on network
+transMgr: ERROR! got multiple cost on order {Floor:2, Type: Down} from 146. oldCostAndToId = {0 -1}, newCost got = 0
+transMgr: Received COST msg on order {Floor:2, Type: Up} from 141 with cost 5 
+transMgr: New delegation sequence on order {Floor:2, Type: Up}, setting cost 5 to id 141
+elevMgr: newMsg case from transMgr = {Source: 0, ElevatorId: 0, MessageId: COST, Button: {Floor:2, Type: Up}, Cost: 0}
+elevMgr: got COST from trans on order, i calculated cost = {2 0} 
+%!(EXTRA int=0)transMgr: sending cost 0 on order {Floor:2, Type: Up} on network
+transMgr: Setting cost on order {Floor:2, Type: Up}, with cost 0 to 146 in existing delegation sequence
+transMgr: No delegation yet, still waiting for 1 other elevs
+elevMgr: Requesting order {Floor:2, Type: Down}
+transMgr: Request UP/DOWN Order on {Floor:2, Type: Down} with cost 0 and 3 elevs online
+transMgr: sending cost 0 on order {Floor:2, Type: Down} on network
+transMgr: ERROR! got multiple cost on order {Floor:2, Type: Down} from 146. oldCostAndToId = {0 -1}, newCost got = 0
+elevMgr: Requesting order {Floor:2, Type: Down}
+transMgr: Request UP/DOWN Order on {Floor:2, Type: Down} with cost 0 and 3 elevs online
+transMgr: sending cost 0 on order {Floor:2, Type: Down} on network
+transMgr: ERROR! got multiple cost on order {Floor:2, Type: Down} from 146. oldCostAndToId = {0 -1}, newCost got = 0
+transMgr: Received COST msg on order {Floor:2, Type: Up} from 141 with cost 5 
+transMgr: ERROR! got multiple cost on order {Floor:2, Type: Up} from 141. oldCostAndToId = {5 -1}, newCost got = 5
+transMgr: Received REMOVE_ORDER: {Source: 141, ElevatorId: 0, MessageId: REMOVE_ORDER, Button: {Floor:2, Type: Up}, Cost: 0}
+elevMgr: newMsg case from transMgr = {Source: 141, ElevatorId: 0, MessageId: REMOVE_ORDER, Button: {Floor:2, Type: Up}, Cost: 0}
+elevMgr: got REMOVE_ORDER from trans on floor 2, removing both
+que: RemoveOrder = {Floor:2, Type: Up}
+que: RemoveOrder = {Floor:2, Type: Down}
+elevMgr: Requesting order {Floor:3, Type: Down}
+transMgr: Request UP/DOWN Order on {Floor:3, Type: Down} with cost 1 and 3 elevs online
+transMgr: sending cost 1 on order {Floor:3, Type: Down} on network
+transMgr: ERROR! got multiple cost on order {Floor:3, Type: Down} from 146. oldCostAndToId = {1 -1}, newCost got = 1
+elevMgr: newMsg case from transMgr = {Source: 141, ElevatorId: 141, MessageId: UNASSIGN_ORDER, Button: {Floor:0, Type: Up}, Cost: 0}
+elevMgr: got UNASSIGN_ORDER from trans on id 141
+que: UnassignOrdersToId = 141
+elevMgr: Requesting order {Floor:3, Type: Down}
+transMgr: Request UP/DOWN Order on {Floor:3, Type: Down} with cost 1 and 3 elevs online
+transMgr: sending cost 1 on order {Floor:3, Type: Down} on network
+transMgr: ERROR! got multiple cost on order {Floor:3, Type: Down} from 146. oldCostAndToId = {1 -1}, newCost got = 1
+===Lost Heartbeat ID: 150, now have 2 elevs===
+elevMgr: newMsg case from transMgr = {Source: 146, ElevatorId: 150, MessageId: UNASSIGN_ORDER, Button: {Floor:0, Type: Up}, Cost: 0}
+elevMgr: got UNASSIGN_ORDER from trans on id 150
+que: UnassignOrdersToId = 150
+elevMgr: Requesting order {Floor:3, Type: Down}
+transMgr: Request UP/DOWN Order on {Floor:3, Type: Down} with cost 1 and 2 elevs online
+transMgr: sending cost 1 on order {Floor:3, Type: Down} on network
+transMgr: ERROR! got multiple cost on order {Floor:3, Type: Down} from 146. oldCostAndToId = {1 -1}, newCost got = 1

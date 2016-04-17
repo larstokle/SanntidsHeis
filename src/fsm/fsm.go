@@ -45,7 +45,6 @@ type ElevatorState struct {
 }
 
 func NewElevator() *ElevatorState {
-	driver.Init()
 	var elev ElevatorState
 	elev.setDestination(NO_DESTINATION)
 	elev.OrderDone = make(chan int, 1)
@@ -60,17 +59,11 @@ func NewElevator() *ElevatorState {
 
 	go func() {
 		for {
-			if(DEBUG_CHANNELS){fmt.Println("fsm: floorEvent could hang, and I think it should until a new floor")}
 			newFloor := <-floorEvent
-			if(DEBUG_CHANNELS){fmt.Println("fsm: floorEvent released")}
-
 			elev.NewFloorReached(newFloor)
-
-			//legge til sleep?
-			
 		}
 	}()
-	if(DEBUG_FSM){fmt.Printf("fsm: init done NewElevator returned\n\n")}
+	fmt.Printf("fsm: init done at floor %d, NewElevator returned\n\n", elev.Floor())
 
 	return &elev
 }
@@ -110,8 +103,14 @@ func (elev *ElevatorState) setDestination(dest int){
 
 func (elev *ElevatorState) NewDestination(destination int) {
 	if(DEBUG_FSM){fmt.Printf("fsm: new destination = %d\n", destination)}
+
+	if destination < FIRST_FLOOR || destination > TOP_FLOOR{
+		destination = NO_DESTINATION
+		return
+	}
+
 	elev.setDestination(destination)
-	if destination == elev.Floor() { //&& elev.fsmState != STATE_DOOR_OPEN{ //forslag til nytt: reset the afterfunc timer in goToStateDoorOpen() if STATE_DOOR_OPEN
+	if destination == elev.Floor() {
 		elev.destinationReaced()
 	} else if elev.State() == STATE_IDLE {
 		elev.goToStateMoving(calculateDir(destination, elev.Floor()))
@@ -129,8 +128,10 @@ func (elev *ElevatorState) NewFloorReached(newFloor int) {
 	elev.setFloor(newFloor)
 	driver.SetFloorIndicator(int(elev.floor))
 	elev.motorErrorTimer.Reset(time.Second*MOTOR_ERROR_SEC)
-	if elev.floor == elev.destination {
+	if elev.Floor() == elev.Destination() {
 		elev.destinationReaced()
+	}else if elev.Destination() == NO_DESTINATION{
+		elev.goToStateIdle()
 	}
 }
 
@@ -142,18 +143,18 @@ func (elev *ElevatorState) goToStateDoorOpen() {
 		elev.doorTimerMutex.Lock()
 		elev.doorTimer.Reset(time.Second * 3)
 		elev.doorTimerMutex.Unlock()
-		if(DEBUG_CHANNELS){fmt.Println("fsm: elev.State() == STATE_DOOR_OPEN goToStateDoorOpen OrderDone could hang")}
+		
 		elev.OrderDone <- int(elev.floor)
-		if(DEBUG_CHANNELS){fmt.Println("fsm:elev.State() == STATE_DOOR_OPEN goToStateDoorOpen OrderDone didn't hang")}	
+		
 		return
 	}
 
 	driver.RunStop()
 	elev.motorErrorTimer.Stop()
 	elev.setState(STATE_DOOR_OPEN)
-	if(DEBUG_CHANNELS){fmt.Println("fsm: goToStateDoorOpen OrderDone could hang")}
+	
 	elev.OrderDone <- int(elev.floor)
-	if(DEBUG_CHANNELS){fmt.Println("fsm: goToStateDoorOpen OrderDone didn't hang")}
+	
 
 	driver.SetDoorOpen(true)
 
@@ -196,11 +197,11 @@ func (elev *ElevatorState) goToStateIdle() {
 	elev.setState(STATE_IDLE)
 }
 
-func (elev *ElevatorState) NeedNewDestination() bool {
-	return elev.Destination() == NO_DESTINATION
-}
-
 func (elev *ElevatorState) GetCost(order Button_t) int {
+	if order == NONVALID_BUTTON || order == NONVALID_BUTTON2 || order.Floor < FIRST_FLOOR || order.Floor > TOP_FLOOR || order.ButtonType < 0 || order.ButtonType >= N_BUTTON_TYPES{
+		return INF_COST
+	}
+
 	newDistance := distance(order.Floor, elev.Floor())
 
 	if elev.Destination() == NO_DESTINATION {
@@ -218,12 +219,14 @@ func (elev *ElevatorState) GetCost(order Button_t) int {
 
 	buttonDir := buttonTypeToDirection(order.ButtonType)
 
-	if order.ButtonType == CMD {
+	if order.ButtonType == CMD { // TROR DET ER EN BUG HER, SWITCHER MELLOM DOWN, OG CMD I SAMME ETASJE
 		return newDistance
 	} else if buttonDir == elev.Dir() {
 		return newDistance + N_FLOORS
+	} else if buttonDir != elev.Dir() {
+		return INF_COST
 	} else {
-		if(DEBUG_FSM){fmt.Printf("fsm: Unhandlet GetCost! ELevator = %+v, order to get cost for = %+v\n", *elev, order)}
+		if(DEBUG_FSM){fmt.Printf("ERROR!! fsm: Unhandlet GetCost! ELevator = %+v, order to get cost for = %+v\n", *elev, order)}
 		return INF_COST
 	}
 }
@@ -241,9 +244,12 @@ func buttonTypeToDirection(buttonType int) Direction_t {
 
 func motorError(){
 	driver.RunStop()
-	fmt.Printf("\n\n\n ================== ERROR, ELEVATOR MOTOR NOT WORKING PROPERLY ==========\n")
-	fmt.Printf("took %d seconds to reach new floor when running, try fixing the problem and restart\n",MOTOR_ERROR_SEC)
-	fmt.Printf("Program exiting now!\n\n\n")
-	fmt.Printf("===============================================================================\n")
+	fmt.Printf("\n\n================== ERROR, ELEVATOR MOTOR NOT WORKING PROPERLY ==========\n\n")
+	if floor := driver.GetFloorSignal(); floor != -1{
+		fmt.Printf("Elevator at floor %d, door opened\n", floor)
+	}
+	fmt.Printf("took %d seconds to reach new floor when running, try fixing the problem and restart\n", MOTOR_ERROR_SEC)
+	fmt.Printf("Program exiting now!\n")
+	fmt.Printf("\n===============================================================================\n\n\n")
 	os.Exit(1)
 }
