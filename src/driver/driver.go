@@ -23,6 +23,7 @@ func init(){
 			SetButtonLight(j,i,false)
 		}
 	}
+	SetDoorOpen(false)
 }
 
 func ReadButton(button int, floor int) bool {

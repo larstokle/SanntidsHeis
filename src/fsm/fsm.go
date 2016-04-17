@@ -222,7 +222,7 @@ func (elev *ElevatorState) GetCost(order Button_t) int {
 	if order.ButtonType == CMD { // TROR DET ER EN BUG HER, SWITCHER MELLOM DOWN, OG CMD I SAMME ETASJE
 		return newDistance
 	} else if buttonDir == elev.Dir() {
-		return newDistance + N_FLOORS
+		return newDistance //+ N_FLOORS
 	} else if buttonDir != elev.Dir() {
 		return INF_COST
 	} else {

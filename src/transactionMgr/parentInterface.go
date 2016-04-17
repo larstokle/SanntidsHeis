@@ -37,29 +37,26 @@ func (transMgr *transactionMgr_t) NewOrder(order Button_t) {
 }
 
 func (transMgr *transactionMgr_t) RequestOrder(order Button_t, cost int) /*bool*/{
-	independentSender := func(){// =========================================================================<<<<<<<SUPERHACK!!
+	go func(){ //Avoid deadlock if sending back to parent
+
+		switch {
+		case transMgr.nElevatorsOnline() <= 1:
+			if(DEBUG_TRNSMGR){fmt.Printf("transMgr: Request ANY Order on %+v with cost %d and %d elevs online, TAKE IT\n", order, cost, transMgr.nElevatorsOnline())}
+	
 			transMgr.ToParent <- message.Message_t{MessageId: message.DELEGATE_ORDER, Button: order, ElevatorId: transMgr.myId}
-	}
+	
+		case order.ButtonType == CMD:
+			if(DEBUG_TRNSMGR){fmt.Printf("transMgr: Request CMD Order on %+v with cost %d and %d elevs online, TAKE IT\n", order, cost, transMgr.nElevatorsOnline())}
+			
+			transMgr.ToParent <- message.Message_t{MessageId: message.DELEGATE_ORDER, Button: order, ElevatorId: transMgr.myId}
+			transMgr.netSend <- message.Message_t{Source: transMgr.myId, MessageId: message.UNASSIGN_ORDER, ElevatorId: transMgr.myId}
 
-	if transMgr.nElevatorsOnline() <= 1{
-		if(DEBUG_TRNSMGR){fmt.Printf("transMgr: Request ANY Order on %+v with cost %d and %d elevs online, TAKE IT\n", order, cost, transMgr.nElevatorsOnline())}
-//==============================================================================
-		//DETTE MÅ FIKSES!
-		go independentSender()
-//==============================================================================
-	} else if order.ButtonType == CMD {
-		if(DEBUG_TRNSMGR){fmt.Printf("transMgr: Request CMD Order on %+v with cost %d and %d elevs online, TAKE IT\n", order, cost, transMgr.nElevatorsOnline())}
-//==============================================================================
-		//DETTE MÅ FIKSES!
-		go independentSender()
-//==============================================================================
-		transMgr.netSend <- message.Message_t{Source: transMgr.myId, MessageId: message.UNASSIGN_ORDER, ElevatorId: transMgr.myId}
-
-	} else {
-		if(DEBUG_TRNSMGR){fmt.Printf("transMgr: Request UP/DOWN Order on %+v with cost %d and %d elevs online\n", order, cost, transMgr.nElevatorsOnline())}
-		transMgr.SendCost(order, cost)
-
-	}
+		default:
+			if(DEBUG_TRNSMGR){fmt.Printf("transMgr: RequestOrder Request UP/DOWN Order on %+v with cost %d and %d elevs online\n", order, cost, transMgr.nElevatorsOnline())}
+			transMgr.netSend <- message.Message_t{Source: transMgr.myId, MessageId: message.REQUEST_ORDER, Button: order, Cost: cost}
+			
+		}
+	}()
 
 }
 
@@ -71,7 +68,7 @@ func (transMgr *transactionMgr_t) RemoveOrder(floor int) {
 		transMgr.netSend <- message.Message_t{Source: transMgr.myId, MessageId: message.REMOVE_ORDER, Button: order}
 		
 	}
-	//kan dette ligge her eller vil det kunne føre til en panic?? må det flyttes inn i ifen?
+
 	order.ButtonType = UP
 	transMgr.delegationMutex.Lock()
 	delete(transMgr.delegation, order)

@@ -1,0 +1,39 @@
+
+Hanged
+=========================== ELEVATOR STARTUP ===========================
+
+eventmgr: CheckFloorSignal started
+
+fsm: init done at floor 1, NewElevator returned
+
+eventmgr: CheckButtons started
+
+transMgr: init done entering loop
+orderQue_t:{
+	Floor 0: UP{ 1, Id: -1}, DOWN{ 0, Id: -1}, CMD{ 0, Id: -1}, 
+	Floor 1: UP{ 0, Id: -1}, DOWN{ 0, Id: -1}, CMD{ 0, Id: -1}, 
+	Floor 2: UP{ 0, Id: -1}, DOWN{ 0, Id: -1}, CMD{ 0, Id: -1}, 
+	Floor 3: UP{ 0, Id: -1}, DOWN{ 1, Id: 140}, CMD{ 0, Id: -1}, 
+}
+=========================== ELEVATOR STARTED ===========================
+
+
+
+===Got New Heartbeat ID: {Id:140}, now have 1 elevs===
+elevMgr: Local elevator requesting order {Floor:0, Type: Up}, with cost 1
+elevMgr: Local elevator got delegated order {Floor:0, Type: Up} 
+===Got New Heartbeat ID: {Id:24}, now have 2 elevs===
+elevMgr: synced with que from id 140
+elevMgr: Local elevator done with floor 0
+elevMgr: Local elevator requesting order {Floor:1, Type: Up}, with cost 1
+elevMgr: Local elevator got delegated order {Floor:1, Type: Up} 
+elevMgr: Local elevator done with floor 1
+elevMgr: Local elevator requesting order {Floor:0, Type: Up}, with cost 1 
+ERROR! elevMgr: could not get the requested order {Floor:0, Type: Up}
+transMgr: got multiple cost on order {Floor:0, Type: Up} from 24, but no pending elevs
+elevMgr: Local elevator got delegated order {Floor:0, Type: Up} 
+ERROR! transMgr: allDelegatedEqual = false, delegation[{Floor:0, Type: Up}] = map[24:{cost:255 toId:140} 140:{cost:1 toId:24}]
+ERROR! transMgr: allDelegatedEqual = false, delegation[{Floor:0, Type: Up}] = map[140:{cost:1 toId:140}] // HANGS HERE PROBABLY!! 
+===Lost Heartbeat ID: 24, now have 1 elevs===
+===transMgr: Lost my own heartbeat, all alone in the world
+===Lost Heartbeat ID: 140, now have 0 elevs===

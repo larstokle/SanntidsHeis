@@ -23,7 +23,7 @@ func Start() {
 	loggedQue := orderque.ReadFromLog()
 	que.SyncInternal(loggedQue)
 	que.SyncExternal(loggedQue)
-	//que.UnassignAllOrders() 			//WTF???
+	que.UnassignAllOrders() 	//WTF??? Gjør før sync? // om du starter opp uten netverk er dette et problem
 	que.Print()
 
 	retryTimer := time.NewTimer(time.Second*5)
@@ -49,6 +49,7 @@ func Start() {
 				if !que.HasOrder(newBtn) {
 					que.AddOrder(newBtn)
 					transMgr.NewOrder(newBtn)
+					//lastOrderRequested = NONVALID_BUTTON
 				}
 
 
@@ -70,11 +71,11 @@ func Start() {
 					que.AssignOrderToId(newMsg.Button, newMsg.ElevatorId)
 					if newMsg.ElevatorId == transMgr.MyId() {
 						fmt.Printf("elevMgr: Local elevator got delegated order %+v \n", newMsg.Button)
-						//lastOrderRequested = NONVALID_BUTTON //=====================================================USIKKER PÅ DENNE, MEN GIR MEG NÅ!!!
+						
 						localElev.NewDestination(newMsg.Button.Floor) //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<>KANAL AV DENNE?? kun brukt her, kan løse litt locks, ikke at vi har noen men						continue
 					} else if !que.IsIdAssigned(transMgr.MyId()) && !que.IsEmpty(){
 						if(DEBUG_ELEVMGR){fmt.Printf("elevMgr: did not get delegation and got no destination\n\n")}
-						//lastOrderRequested = NONVALID_BUTTON //Lurer på om den skal inn her!				
+								
 					}
 
 				case message.REMOVE_ORDER:
@@ -85,19 +86,20 @@ func Start() {
 					toRemove.ButtonType = DOWN
 					que.RemoveOrder(toRemove)
 
-				case message.COST:
+				case message.REQUEST_ORDER:
 					order := newMsg.Button
 					cost := localElev.GetCost(order)
 					if(DEBUG_ELEVMGR){fmt.Printf("elevMgr: got COST from trans on order %+v, i calculated cost = %d \n", order, cost)}
 					if !que.HasOrder(order){
 						fmt.Printf("ERROR! elevMgr: Reveived COST request from transMgr without having order %+v in queue \n\n", order)
 					}
+
 					transMgr.SendCost(order, cost)
 
 				case message.UNASSIGN_ORDER:
 					unassignId := newMsg.ElevatorId
 					if(DEBUG_ELEVMGR){fmt.Printf("elevMgr: got UNASSIGN_ORDER from trans on id %d\n", unassignId)}
-					
+
 					if unassignId != transMgr.MyId(){
 						que.UnassignOrdersToID(unassignId)
 					} else{
@@ -112,7 +114,9 @@ func Start() {
 					}
 					que.SyncExternal(queToSyncWith)
 					que.WriteToLog()
+					lastOrderRequested = NONVALID_BUTTON
 					fmt.Printf("elevMgr: synced with que from id %d\n", newMsg.Source)//====================SKAL VI HA DEBUGPRINT PÅ DENNE ? en ny NOPRINTATALL?
+					continue
 					
 				case message.HEARTBEAT:
 					if(DEBUG_ELEVMGR){fmt.Printf("elevMgr: got HEARTBEAT from trans, Encoding que\n")}
@@ -121,12 +125,16 @@ func Start() {
 						fmt.Println("ERROR! orderque.Encode: ",err)
 					}
 					transMgr.SendSync(rawQue)
+					lastOrderRequested = NONVALID_BUTTON
+					continue
 
 				default:							
 					fmt.Printf("ERROR! elevMgr: Unhandled MessageId : %+v", newMsg)
 				}
 			case <-retryTimer.C:
-				if(DEBUG_ELEVMGR){fmt.Printf("elevMgr: timed out, checking for better orders\n")}
+				fmt.Printf("elevMgr: timed out, checking for better orders\n")
+				que.Print()
+				
 			}
 
 			if !que.IsEmpty(){ //Try to get a better destination
@@ -146,16 +154,19 @@ func Start() {
 				}
 
 				lastOrderCost := localElev.GetCost(lastOrderRequested)
-				if bestOrder == lastOrderRequested && lowestCost < fsm.INF_COST{ // ============ NOT DONE!!! NEED SOME EXTRAS
-					fmt.Printf("ERROR! elevMgr: could not get the requested order %+v\n", lastOrderRequested)
-
-				} else if lowestCost < fsm.INF_COST && lowestCost < lastOrderCost && bestOrder != lastOrderRequested{
-					fmt.Printf("elevMgr: Local elevator requesting order %+v, with cost %d\n", bestOrder,localElev.GetCost(bestOrder) ) // ====================SKAL VI HA DEBUGPRINT PÅ DENNE ? en ny NOPRINTATALL?
-					transMgr.RequestOrder(bestOrder, lowestCost)
-					lastOrderRequested = bestOrder
+				if lowestCost < fsm.INF_COST{
+					/*if bestOrder == lastOrderRequested{ // ============ NOT DONE!!! NEED SOME EXTRAS
+						fmt.Printf("ERROR! elevMgr: could not get the requested order %+v, bestOrder is %+v\n", lastOrderRequested, bestOrder)
+	
+					} else*/ 
+					if lowestCost < lastOrderCost{
+						fmt.Printf("elevMgr: Local elevator requesting order %+v, with cost %d\n", bestOrder,localElev.GetCost(bestOrder) ) // ====================SKAL VI HA DEBUGPRINT PÅ DENNE ? en ny NOPRINTATALL?
+						transMgr.RequestOrder(bestOrder, lowestCost)
+						lastOrderRequested = bestOrder
+					}	
 				}
-				retryTimer.Reset(time.Second*10)
 			}
+			retryTimer.Reset(time.Second*10)
 		}
 	}()
 }

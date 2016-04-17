@@ -57,7 +57,7 @@ func (btn Button_t) String() string {
 var NONVALID_BUTTON = Button_t{FIRST_FLOOR, DOWN}
 var NONVALID_BUTTON2 = Button_t{TOP_FLOOR, UP}
 
-var DEBUG_TRNSMGR bool = false
+var DEBUG_TRNSMGR bool = true
 var DEBUG_ELEVMGR bool = false
 var DEBUG_FSM bool = false
 var DEBUG_QUE bool = false

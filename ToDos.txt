@@ -1,0 +1,19 @@
+(X) fikse (transMgr *transactionMgr_t) RequestOrder
+
+- Finne grunn til at transMgr henger(Har ikke isolert feil enda, så er ikke garantert at den er der) / restarte hvis den ikke får noe drit på en stund
+
+- transMGR line 118 else if nDelegated == len(transMgr.delegation[order]) bør bli mer sofistikert
+
+- transMgr  setLowestCostId(order Button_t) kan kanskje få et forbedret navn?
+(X) Hva faen er dette?(skal den over?) elevMgr line 26 //que.UnassignAllOrders() 			//WTF???
+
+- Få lastOrderRequested = NONVALID_BUTTON må tenkes gjennom, sjekke logikken
+
+- Flytte newMsg assignments foran switch i Trans
+
+- Tanker rundt elevMgr if bestOrder == lastOrderRequested && lowestCost < fsm.INF_COST{ // ============ NOT DONE!!! NEED SOME EXTRAS
+
+- Catche Panic? heller sjekke explicit etter flere feil
+- Process Pairs?
+
+

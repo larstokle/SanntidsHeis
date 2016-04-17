@@ -1,0 +1,65 @@
+not hanging
+=========================== ELEVATOR STARTUP ===========================
+
+eventmgr: CheckFloorSignal started
+
+fsm: init done at floor 2, NewElevator returned
+
+eventmgr: CheckButtons started
+
+transMgr: init done entering loop
+orderQue_t:{
+	Floor 0: UP{ 0, Id: -1}, DOWN{ 0, Id: -1}, CMD{ 0, Id: -1}, 
+	Floor 1: UP{ 0, Id: -1}, DOWN{ 0, Id: -1}, CMD{ 0, Id: -1}, 
+	Floor 2: UP{ 0, Id: -1}, DOWN{ 0, Id: -1}, CMD{ 0, Id: -1}, 
+	Floor 3: UP{ 0, Id: -1}, DOWN{ 0, Id: -1}, CMD{ 0, Id: -1}, 
+}
+=========================== ELEVATOR STARTED ===========================
+
+
+
+===Got New Heartbeat ID: {Id:140}, now have 1 elevs===
+elevMgr: synced with que from id 24
+===Got New Heartbeat ID: {Id:24}, now have 2 elevs===
+elevMgr: Local elevator requesting order {Floor:2, Type: Down}, with cost 0
+elevMgr: Local elevator got delegated order {Floor:2, Type: Down} 
+elevMgr: Local elevator done with floor 2
+ERROR! elevMgr: Reveived COST request from transMgr without having order {Floor:2, Type: Down} in queue 
+
+ERROR! transMgr: Received DELEGATE_ORDER ({Floor:2, Type: Down}) where cost not set from 24
+elevMgr: Local elevator got delegated order {Floor:2, Type: Down} 
+elevMgr: Local elevator done with floor 2
+elevMgr: Local elevator requesting order {Floor:1, Type: Up}, with cost 1
+elevMgr: Local elevator requesting order {Floor:2, Type: Up}, with cost 0
+ERROR! elevMgr: could not get the requested order {Floor:2, Type: Up}
+ERROR! elevMgr: could not get the requested order {Floor:2, Type: Up}
+elevMgr: Local elevator got delegated order {Floor:2, Type: Up} 
+elevMgr: Local elevator done with floor 2
+elevMgr: Local elevator requesting order {Floor:3, Type: Down}, with cost 1
+ERROR! elevMgr: could not get the requested order {Floor:3, Type: Down}
+elevMgr: Local elevator got delegated order {Floor:3, Type: Down} 
+===Lost Heartbeat ID: 24, now have 1 elevs===
+elevMgr: Local elevator done with floor 3
+elevMgr: Local elevator requesting order {Floor:0, Type: Up}, with cost 3
+elevMgr: Local elevator got delegated order {Floor:0, Type: Up} 
+elevMgr: synced with que from id 24
+===Got New Heartbeat ID: {Id:24}, now have 2 elevs=== // TROUBLE DOWN FROM HERE, OTHER ELEV STARTED
+elevMgr: Local elevator done with floor 0
+elevMgr: Local elevator requesting order {Floor:1, Type: Down}, with cost 1
+elevMgr: Local elevator got delegated order {Floor:1, Type: Down} 
+elevMgr: Local elevator done with floor 1
+elevMgr: Local elevator requesting order {Floor:0, Type: Up}, with cost 1
+elevMgr: Local elevator got delegated order {Floor:0, Type: Up} 
+===Lost Heartbeat ID: 24, now have 1 elevs===
+elevMgr: Local elevator done with floor 0
+elevMgr: Local elevator requesting order {Floor:1, Type: Down}, with cost 1
+elevMgr: Local elevator got delegated order {Floor:1, Type: Down} 
+elevMgr: Local elevator requesting order {Floor:1, Type: Command}, with cost 1
+elevMgr: Local elevator got delegated order {Floor:1, Type: Command} 
+elevMgr: Local elevator done with floor 1
+elevMgr: Local elevator requesting order {Floor:2, Type: Command}, with cost 1
+elevMgr: Local elevator got delegated order {Floor:2, Type: Command} 
+elevMgr: Local elevator done with floor 2
+elevMgr: Local elevator requesting order {Floor:0, Type: Command}, with cost 2
+elevMgr: Local elevator got delegated order {Floor:0, Type: Command} 
+elevMgr: Local elevator done with floor 0
