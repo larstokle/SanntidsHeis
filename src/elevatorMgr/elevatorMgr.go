@@ -41,7 +41,8 @@ func Start() {
 			case floorDone := <-localElev.OrderDone:
 				fmt.Printf("elevMgr: Local elevator done with floor %+v\n", floorDone)
 				que.RemoveOrdersOnFloor(floorDone)
-				transMgr.RemoveOrder(floorDone)			
+				transMgr.RemoveOrder(floorDone)
+				lastOrderRequested = NONVALID_BUTTON			
 
 			case newBtn := <-btnPush:
 				if(DEBUG_ELEVMGR){fmt.Printf("elevMgr: newBtn case from eventmgr = %+v\n", newBtn)}
@@ -69,10 +70,11 @@ func Start() {
 					que.AssignOrderToId(newMsg.Button, newMsg.ElevatorId)
 					if newMsg.ElevatorId == transMgr.MyId() {
 						fmt.Printf("elevMgr: Local elevator got delegated order %+v \n", newMsg.Button)
-						lastOrderRequested = NONVALID_BUTTON //=====================================================USIKKER PÅ DENNE, MEN GIR MEG NÅ!!!
+						//lastOrderRequested = NONVALID_BUTTON //=====================================================USIKKER PÅ DENNE, MEN GIR MEG NÅ!!!
 						localElev.NewDestination(newMsg.Button.Floor) //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<>KANAL AV DENNE?? kun brukt her, kan løse litt locks, ikke at vi har noen men						continue
 					} else if !que.IsIdAssigned(transMgr.MyId()) && !que.IsEmpty(){
-						if(DEBUG_ELEVMGR){fmt.Printf("elevMgr: did not get delegation and got no destination\n\n")}				
+						if(DEBUG_ELEVMGR){fmt.Printf("elevMgr: did not get delegation and got no destination\n\n")}
+						//lastOrderRequested = NONVALID_BUTTON //Lurer på om den skal inn her!				
 					}
 
 				case message.REMOVE_ORDER:
@@ -147,7 +149,7 @@ func Start() {
 					fmt.Printf("ERROR! elevMgr: could not get the requested order %+v\n", lastOrderRequested)
 
 				} else if lowestCost < fsm.INF_COST && lowestCost < lastOrderCost && bestOrder != lastOrderRequested{
-					fmt.Printf("elevMgr: Local elevator requesting order %+v\n", bestOrder)// ====================SKAL VI HA DEBUGPRINT PÅ DENNE ? en ny NOPRINTATALL?
+					fmt.Printf("elevMgr: Local elevator requesting order %+v, with cost %d\n", bestOrder,localElev.GetCost(bestOrder) ) // ====================SKAL VI HA DEBUGPRINT PÅ DENNE ? en ny NOPRINTATALL?
 					transMgr.RequestOrder(bestOrder, lowestCost)
 					lastOrderRequested = bestOrder
 				}
