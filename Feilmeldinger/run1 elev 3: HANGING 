@@ -1,0 +1,587 @@
+=========================== ELEVATOR STARTUP ===========================
+
+eventmgr: CheckFloorSignal started
+
+fsm: New floor reached= 2
+fsm: Going idle in floor =  2
+fsm: init done NewElevator returned
+
+eventmgr: CheckButtons started
+
+que: init done NewOrderQue returned
+
+transMgr: init done entering loop
+que: init done NewOrderQue returned
+
+===Got New Heartbeat ID: {Id:150}, now have 1 elevs===
+elevMgr: init done entering loop
+
+=========================== ELEVATOR STARTED ===========================
+
+
+
+elevMgr: newMsg case from transMgr = {Source: 141, ElevatorId: 0, MessageId: SYNC, Button: {Floor:0, Type: Up}, Cost: 0}
+elevMgr: got SYNC from trans from elevator 141
+elevMgr: Requesting order {Floor:2, Type: Command}
+transMgr: Request ANY Order on {Floor:2, Type: Command} with cost 0 and 1 elevs online, TAKE IT
+elevMgr: newMsg case from transMgr = {Source: 0, ElevatorId: 150, MessageId: DELEGATE_ORDER, Button: {Floor:2, Type: Command}, Cost: 0}
+elevMgr: got DELEGATE_ORDER from trans on order {Floor:2, Type: Command} to 150
+que: UnassignOrdersToId = 150
+que: Unassigned order: floor = 1, orderType = 2que: AssignOrder = {Floor:2, Type: Command}, ToId = 150
+fsm: new destination = 2
+fsm: Destination reached
+fsm: Door Opening in floor = 2
+elevMgr: floorDone case from fsm = 2
+que: RemoveOrdersOnFloor = 2
+que: RemoveOrder = {Floor:2, Type: Up}
+que: RemoveOrder = {Floor:2, Type: Down}
+que: RemoveOrder = {Floor:2, Type: Command}
+Remaining orders: 
+orderQue_t:
+	Floor: 0
+		 type: 0: has order = false,last Changed: = 2016-04-16 21:08:50.839891244 +0200 CEST
+		 type: 1: has order = false,last Changed: = 0001-01-01 00:00:00 +0000 UTC
+		 type: 2: has order = false,last Changed: = 2016-04-16 21:08:50.880137111 +0200 CEST
+	Floor: 1
+		 type: 0: has order = false,last Changed: = 2016-04-16 21:09:07.31781966 +0200 CEST
+		 type: 1: has order = true,last Changed: = 2016-04-16 21:09:19.329419033 +0200 CEST
+		 type: 2: has order = true,last Changed: = 2016-04-16 21:08:50.881301377 +0200 CEST
+	Floor: 2
+		 type: 0: has order = false,last Changed: = 2016-04-16 21:08:54.610290131 +0200 CEST
+		 type: 1: has order = false,last Changed: = 2016-04-16 21:09:22.075511082 +0200 CEST
+		 type: 2: has order = false,last Changed: = 2016-04-16 21:09:22.075641295 +0200 CEST
+	Floor: 3
+		 type: 0: has order = false,last Changed: = 0001-01-01 00:00:00 +0000 UTC
+		 type: 1: has order = true,last Changed: = 2016-04-16 21:09:18.782413278 +0200 CEST
+		 type: 2: has order = true,last Changed: = 2016-04-16 21:08:50.88195293 +0200 CEST
+
+transMgr: sending remove order (floor) on network = 2
+elevMgr: floorDone case done = 2
+elevMgr: Requesting order {Floor:3, Type: Command}
+transMgr: Request ANY Order on {Floor:3, Type: Command} with cost 1 and 1 elevs online, TAKE IT
+elevMgr: newMsg case from transMgr = {Source: 0, ElevatorId: 150, MessageId: DELEGATE_ORDER, Button: {Floor:3, Type: Command}, Cost: 0}
+elevMgr: got DELEGATE_ORDER from trans on order {Floor:3, Type: Command} to 150
+que: UnassignOrdersToId = 150
+que: AssignOrder = {Floor:3, Type: Command}, ToId = 150
+fsm: new destination = 3
+===Got New Heartbeat ID: {Id:141}, now have 2 elevs===
+elevMgr: newMsg case from transMgr = {Source: 0, ElevatorId: 0, MessageId: HEARTBEAT, Button: {Floor:0, Type: Up}, Cost: 0}
+elevMgr: got HEARTBEAT from trans, Encoding que
+transMgr: SendSync Sending que
+elevMgr: Requesting order {Floor:1, Type: Command}
+transMgr: Request CMD Order on {Floor:1, Type: Command} with cost 1 and 2 elevs online, TAKE IT
+elevMgr: newMsg case from transMgr = {Source: 0, ElevatorId: 150, MessageId: DELEGATE_ORDER, Button: {Floor:1, Type: Command}, Cost: 0}
+elevMgr: got DELEGATE_ORDER from trans on order {Floor:1, Type: Command} to 150
+que: UnassignOrdersToId = 150
+que: Unassigned order: floor = 3, orderType = 2que: AssignOrder = {Floor:1, Type: Command}, ToId = 150
+fsm: new destination = 1
+transMgr: Received REMOVE_ORDER: {Source: 141, ElevatorId: 0, MessageId: REMOVE_ORDER, Button: {Floor:3, Type: Up}, Cost: 0}
+transMgr: Received COST msg on order {Floor:1, Type: Down} from 141 with cost 2 
+transMgr: New delegation sequence on order {Floor:1, Type: Down}, setting cost 2 to id 141
+elevMgr: newMsg case from transMgr = {Source: 141, ElevatorId: 0, MessageId: REMOVE_ORDER, Button: {Floor:3, Type: Up}, Cost: 0}
+elevMgr: got REMOVE_ORDER from trans on floor 3, removing both
+que: RemoveOrder = {Floor:3, Type: Up}
+que: RemoveOrder = {Floor:3, Type: Down}
+elevMgr: Requesting order {Floor:3, Type: Command}
+transMgr: Request CMD Order on {Floor:3, Type: Command} with cost 1 and 2 elevs online, TAKE IT
+elevMgr: newMsg case from transMgr = {Source: 0, ElevatorId: 0, MessageId: COST, Button: {Floor:1, Type: Down}, Cost: 0}
+elevMgr: got COST from trans on order, i calculated cost = {1 1} 
+%!(EXTRA int=255)transMgr: sending cost 255 on order {Floor:1, Type: Down} on network
+transMgr: Setting cost on order {Floor:1, Type: Down}, with cost 255 to 150 in existing delegation sequence
+transMgr: Delegate order {Floor:1, Type: Down} to id 141
+elevMgr: Requesting order {Floor:3, Type: Command}
+transMgr: Request CMD Order on {Floor:3, Type: Command} with cost 1 and 2 elevs online, TAKE IT
+elevMgr: newMsg case from transMgr = {Source: 0, ElevatorId: 150, MessageId: DELEGATE_ORDER, Button: {Floor:3, Type: Command}, Cost: 0}
+elevMgr: got DELEGATE_ORDER from trans on order {Floor:3, Type: Command} to 150
+que: UnassignOrdersToId = 150
+que: Unassigned order: floor = 1, orderType = 2que: AssignOrder = {Floor:3, Type: Command}, ToId = 150
+fsm: new destination = 3
+elevMgr: newMsg case from transMgr = {Source: 0, ElevatorId: 150, MessageId: DELEGATE_ORDER, Button: {Floor:3, Type: Command}, Cost: 0}
+elevMgr: got DELEGATE_ORDER from trans on order {Floor:3, Type: Command} to 150
+que: UnassignOrdersToId = 150
+que: Unassigned order: floor = 3, orderType = 2que: AssignOrder = {Floor:3, Type: Command}, ToId = 150
+fsm: new destination = 3
+transMgr: Received DELEGATE_ORDER msg ({Floor:1, Type: Down}) from 141 to 141
+tranMgr: allDelegatedEqual = true. delegated order {Floor:1, Type: Down} to elevator 141
+elevMgr: newMsg case from transMgr = {Source: 0, ElevatorId: 141, MessageId: DELEGATE_ORDER, Button: {Floor:1, Type: Down}, Cost: 0}
+elevMgr: got DELEGATE_ORDER from trans on order {Floor:1, Type: Down} to 141
+que: UnassignOrdersToId = 141
+que: AssignOrder = {Floor:1, Type: Down}, ToId = 141
+elevMgr: Requesting order {Floor:1, Type: Command}
+transMgr: Request CMD Order on {Floor:1, Type: Command} with cost 1 and 2 elevs online, TAKE IT
+elevMgr: newMsg case from transMgr = {Source: 0, ElevatorId: 150, MessageId: DELEGATE_ORDER, Button: {Floor:1, Type: Command}, Cost: 0}
+elevMgr: got DELEGATE_ORDER from trans on order {Floor:1, Type: Command} to 150
+que: UnassignOrdersToId = 150
+que: Unassigned order: floor = 3, orderType = 2que: AssignOrder = {Floor:1, Type: Command}, ToId = 150
+fsm: new destination = 1
+transMgr: Received COST msg on order {Floor:1, Type: Down} from 141 with cost 2 
+transMgr: New delegation sequence on order {Floor:1, Type: Down}, setting cost 2 to id 141
+elevMgr: newMsg case from transMgr = {Source: 0, ElevatorId: 0, MessageId: COST, Button: {Floor:1, Type: Down}, Cost: 0}
+elevMgr: got COST from trans on order, i calculated cost = {1 1} 
+%!(EXTRA int=255)transMgr: sending cost 255 on order {Floor:1, Type: Down} on network
+transMgr: Setting cost on order {Floor:1, Type: Down}, with cost 255 to 150 in existing delegation sequence
+transMgr: Delegate order {Floor:1, Type: Down} to id 141
+elevMgr: Requesting order {Floor:3, Type: Command}
+transMgr: Request CMD Order on {Floor:3, Type: Command} with cost 1 and 2 elevs online, TAKE IT
+elevMgr: newMsg case from transMgr = {Source: 0, ElevatorId: 150, MessageId: DELEGATE_ORDER, Button: {Floor:3, Type: Command}, Cost: 0}
+elevMgr: got DELEGATE_ORDER from trans on order {Floor:3, Type: Command} to 150
+que: UnassignOrdersToId = 150
+que: Unassigned order: floor = 1, orderType = 2que: AssignOrder = {Floor:3, Type: Command}, ToId = 150
+fsm: new destination = 3
+fsm: Door closing, currentDestination = 3
+fsm: Starting to move in dir = 1 against destination = 3
+
+
+fsm: New floor reached= 3
+fsm: Destination reached
+fsm: Door Opening in floor = 3
+elevMgr: floorDone case from fsm = 3
+que: RemoveOrdersOnFloor = 3
+que: RemoveOrder = {Floor:3, Type: Up}
+que: RemoveOrder = {Floor:3, Type: Down}
+que: RemoveOrder = {Floor:3, Type: Command}
+Remaining orders: 
+orderQue_t:
+	Floor: 0
+		 type: 0: has order = false,last Changed: = 2016-04-16 21:08:50.839891244 +0200 CEST
+		 type: 1: has order = false,last Changed: = 0001-01-01 00:00:00 +0000 UTC
+		 type: 2: has order = false,last Changed: = 2016-04-16 21:08:50.880137111 +0200 CEST
+	Floor: 1
+		 type: 0: has order = false,last Changed: = 2016-04-16 21:09:07.31781966 +0200 CEST
+		 type: 1: has order = true,last Changed: = 2016-04-16 21:09:19.329419033 +0200 CEST
+		 type: 2: has order = true,last Changed: = 2016-04-16 21:08:50.881301377 +0200 CEST
+	Floor: 2
+		 type: 0: has order = false,last Changed: = 2016-04-16 21:08:54.610290131 +0200 CEST
+		 type: 1: has order = false,last Changed: = 2016-04-16 21:09:22.075511082 +0200 CEST
+		 type: 2: has order = false,last Changed: = 2016-04-16 21:09:22.075641295 +0200 CEST
+	Floor: 3
+		 type: 0: has order = false,last Changed: = 0001-01-01 00:00:00 +0000 UTC
+		 type: 1: has order = false,last Changed: = 2016-04-16 21:09:23.784192258 +0200 CEST
+		 type: 2: has order = false,last Changed: = 2016-04-16 21:09:27.413278063 +0200 CEST
+
+transMgr: sending remove order (floor) on network = 3
+elevMgr: floorDone case done = 3
+elevMgr: Requesting order {Floor:1, Type: Command}
+transMgr: Request CMD Order on {Floor:1, Type: Command} with cost 2 and 2 elevs online, TAKE IT
+elevMgr: newMsg case from transMgr = {Source: 0, ElevatorId: 150, MessageId: DELEGATE_ORDER, Button: {Floor:1, Type: Command}, Cost: 0}
+elevMgr: got DELEGATE_ORDER from trans on order {Floor:1, Type: Command} to 150
+que: UnassignOrdersToId = 150
+que: AssignOrder = {Floor:1, Type: Command}, ToId = 150
+fsm: new destination = 1
+fsm: Door closing, currentDestination = 1
+fsm: Starting to move in dir = -1 against destination = 1
+
+
+fsm: New floor reached= 2
+fsm: New floor reached= 1
+fsm: Destination reached
+fsm: Door Opening in floor = 1
+elevMgr: floorDone case from fsm = 1
+que: RemoveOrdersOnFloor = 1
+que: RemoveOrder = {Floor:1, Type: Up}
+que: RemoveOrder = {Floor:1, Type: Down}
+que: RemoveOrder = {Floor:1, Type: Command}
+Remaining orders: 
+orderQue_t:
+	Floor: 0
+		 type: 0: has order = false,last Changed: = 2016-04-16 21:08:50.839891244 +0200 CEST
+		 type: 1: has order = false,last Changed: = 0001-01-01 00:00:00 +0000 UTC
+		 type: 2: has order = false,last Changed: = 2016-04-16 21:08:50.880137111 +0200 CEST
+	Floor: 1
+		 type: 0: has order = false,last Changed: = 2016-04-16 21:09:07.31781966 +0200 CEST
+		 type: 1: has order = false,last Changed: = 2016-04-16 21:09:35.311968053 +0200 CEST
+		 type: 2: has order = false,last Changed: = 2016-04-16 21:09:35.312092957 +0200 CEST
+	Floor: 2
+		 type: 0: has order = false,last Changed: = 2016-04-16 21:08:54.610290131 +0200 CEST
+		 type: 1: has order = false,last Changed: = 2016-04-16 21:09:22.075511082 +0200 CEST
+		 type: 2: has order = false,last Changed: = 2016-04-16 21:09:22.075641295 +0200 CEST
+	Floor: 3
+		 type: 0: has order = false,last Changed: = 0001-01-01 00:00:00 +0000 UTC
+		 type: 1: has order = false,last Changed: = 2016-04-16 21:09:23.784192258 +0200 CEST
+		 type: 2: has order = false,last Changed: = 2016-04-16 21:09:27.413278063 +0200 CEST
+
+transMgr: sending remove order (floor) on network = 1
+elevMgr: floorDone case done = 1
+fsm: Door closing, currentDestination = -1
+fsm: Going idle in floor =  1
+===Lost Heartbeat ID: 141, now have 1 elevs===
+elevMgr: newMsg case from transMgr = {Source: 150, ElevatorId: 141, MessageId: UNASSIGN_ORDER, Button: {Floor:0, Type: Up}, Cost: 0}
+elevMgr: got UNASSIGN_ORDER from trans on id 141
+que: UnassignOrdersToId = 141
+===Got New Heartbeat ID: {Id:141}, now have 2 elevs===
+elevMgr: newMsg case from transMgr = {Source: 0, ElevatorId: 0, MessageId: HEARTBEAT, Button: {Floor:0, Type: Up}, Cost: 0}
+elevMgr: got HEARTBEAT from trans, Encoding que
+transMgr: SendSync Sending que
+elevMgr: newMsg case from transMgr = {Source: 141, ElevatorId: 0, MessageId: SYNC, Button: {Floor:0, Type: Up}, Cost: 0}
+elevMgr: got SYNC from trans from elevator 141
+transMgr: Received NEW_ORDER: {Source: 141, ElevatorId: 0, MessageId: NEW_ORDER, Button: {Floor:1, Type: Up}, Cost: 0}
+transMgr: WAIT FOR CONFIRMATION FROM ELEVMGR
+elevMgr: newMsg case from transMgr = {Source: 141, ElevatorId: 0, MessageId: NEW_ORDER, Button: {Floor:1, Type: Up}, Cost: 0}
+elevMgr: newOrder from transMgr = {Floor:1, Type: Up}
+que: AddOrder = {Floor:1, Type: Up}
+elevMgr: Requesting order {Floor:1, Type: Up}
+transMgr: Request UP/DOWN Order on {Floor:1, Type: Up} with cost 0 and 2 elevs online
+transMgr: sending cost 0 on order {Floor:1, Type: Up} on network
+transMgr: New delegation sequence on order {Floor:1, Type: Up}, setting cost 0 to id 150
+transMgr: GOT CONFIRMATION FROM ELEVMGR
+transMgr: Received COST msg on order {Floor:1, Type: Up} from 141 with cost 2 
+transMgr: Setting cost on order {Floor:1, Type: Up}, with cost 2 to 141 in existing delegation sequence
+transMgr: Delegate order {Floor:1, Type: Up} to id 150
+transMgr: Received DELEGATE_ORDER msg ({Floor:1, Type: Up}) from 141 to 150
+tranMgr: allDelegatedEqual = true. delegated order {Floor:1, Type: Up} to elevator 150
+elevMgr: newMsg case from transMgr = {Source: 0, ElevatorId: 150, MessageId: DELEGATE_ORDER, Button: {Floor:1, Type: Up}, Cost: 0}
+elevMgr: got DELEGATE_ORDER from trans on order {Floor:1, Type: Up} to 150
+que: UnassignOrdersToId = 150
+que: AssignOrder = {Floor:1, Type: Up}, ToId = 150
+fsm: new destination = 1
+fsm: Destination reached
+fsm: Door Opening in floor = 1
+elevMgr: floorDone case from fsm = 1
+que: RemoveOrdersOnFloor = 1
+que: RemoveOrder = {Floor:1, Type: Up}
+que: RemoveOrder = {Floor:1, Type: Down}
+que: RemoveOrder = {Floor:1, Type: Command}
+Remaining orders: 
+orderQue_t:
+	Floor: 0
+		 type: 0: has order = false,last Changed: = 2016-04-16 21:08:50.839891244 +0200 CEST
+		 type: 1: has order = false,last Changed: = 0001-01-01 00:00:00 +0000 UTC
+		 type: 2: has order = false,last Changed: = 2016-04-16 21:08:50.880137111 +0200 CEST
+	Floor: 1
+		 type: 0: has order = false,last Changed: = 2016-04-16 21:12:26.530549565 +0200 CEST
+		 type: 1: has order = false,last Changed: = 2016-04-16 21:09:35.311968053 +0200 CEST
+		 type: 2: has order = false,last Changed: = 2016-04-16 21:09:35.312092957 +0200 CEST
+	Floor: 2
+		 type: 0: has order = false,last Changed: = 2016-04-16 21:08:54.610290131 +0200 CEST
+		 type: 1: has order = false,last Changed: = 2016-04-16 21:09:22.075511082 +0200 CEST
+		 type: 2: has order = false,last Changed: = 2016-04-16 21:09:22.075641295 +0200 CEST
+	Floor: 3
+		 type: 0: has order = false,last Changed: = 0001-01-01 00:00:00 +0000 UTC
+		 type: 1: has order = false,last Changed: = 2016-04-16 21:09:23.784192258 +0200 CEST
+		 type: 2: has order = false,last Changed: = 2016-04-16 21:09:27.413278063 +0200 CEST
+
+transMgr: sending remove order (floor) on network = 1
+elevMgr: floorDone case done = 1
+fsm: Door closing, currentDestination = -1
+fsm: Going idle in floor =  1
+transMgr: Received NEW_ORDER: {Source: 141, ElevatorId: 0, MessageId: NEW_ORDER, Button: {Floor:0, Type: Up}, Cost: 0}
+transMgr: WAIT FOR CONFIRMATION FROM ELEVMGR
+elevMgr: newMsg case from transMgr = {Source: 141, ElevatorId: 0, MessageId: NEW_ORDER, Button: {Floor:0, Type: Up}, Cost: 0}
+elevMgr: newOrder from transMgr = {Floor:0, Type: Up}
+que: AddOrder = {Floor:0, Type: Up}
+elevMgr: Requesting order {Floor:0, Type: Up}
+transMgr: Request UP/DOWN Order on {Floor:0, Type: Up} with cost 1 and 2 elevs online
+transMgr: sending cost 1 on order {Floor:0, Type: Up} on network
+transMgr: New delegation sequence on order {Floor:0, Type: Up}, setting cost 1 to id 150
+transMgr: GOT CONFIRMATION FROM ELEVMGR
+transMgr: Received COST msg on order {Floor:0, Type: Up} from 141 with cost 3 
+transMgr: Setting cost on order {Floor:0, Type: Up}, with cost 3 to 141 in existing delegation sequence
+transMgr: Delegate order {Floor:0, Type: Up} to id 150
+transMgr: Received DELEGATE_ORDER msg ({Floor:0, Type: Up}) from 141 to 150
+tranMgr: allDelegatedEqual = true. delegated order {Floor:0, Type: Up} to elevator 150
+elevMgr: newMsg case from transMgr = {Source: 0, ElevatorId: 150, MessageId: DELEGATE_ORDER, Button: {Floor:0, Type: Up}, Cost: 0}
+elevMgr: got DELEGATE_ORDER from trans on order {Floor:0, Type: Up} to 150
+que: UnassignOrdersToId = 150
+que: AssignOrder = {Floor:0, Type: Up}, ToId = 150
+fsm: new destination = 0
+fsm: Starting to move in dir = -1 against destination = 0
+
+
+transMgr: Received NEW_ORDER: {Source: 141, ElevatorId: 0, MessageId: NEW_ORDER, Button: {Floor:2, Type: Down}, Cost: 0}
+transMgr: WAIT FOR CONFIRMATION FROM ELEVMGR
+elevMgr: newMsg case from transMgr = {Source: 141, ElevatorId: 0, MessageId: NEW_ORDER, Button: {Floor:2, Type: Down}, Cost: 0}
+elevMgr: newOrder from transMgr = {Floor:2, Type: Down}
+que: AddOrder = {Floor:2, Type: Down}
+transMgr: GOT CONFIRMATION FROM ELEVMGR
+transMgr: Received COST msg on order {Floor:2, Type: Down} from 141 with cost 1 
+transMgr: New delegation sequence on order {Floor:2, Type: Down}, setting cost 1 to id 141
+elevMgr: newMsg case from transMgr = {Source: 0, ElevatorId: 0, MessageId: COST, Button: {Floor:2, Type: Down}, Cost: 0}
+elevMgr: got COST from trans on order, i calculated cost = {2 1} 
+%!(EXTRA int=255)transMgr: sending cost 255 on order {Floor:2, Type: Down} on network
+transMgr: Setting cost on order {Floor:2, Type: Down}, with cost 255 to 150 in existing delegation sequence
+transMgr: Delegate order {Floor:2, Type: Down} to id 141
+transMgr: Received DELEGATE_ORDER msg ({Floor:2, Type: Down}) from 141 to 141
+tranMgr: allDelegatedEqual = true. delegated order {Floor:2, Type: Down} to elevator 141
+elevMgr: newMsg case from transMgr = {Source: 0, ElevatorId: 141, MessageId: DELEGATE_ORDER, Button: {Floor:2, Type: Down}, Cost: 0}
+elevMgr: got DELEGATE_ORDER from trans on order {Floor:2, Type: Down} to 141
+que: UnassignOrdersToId = 141
+que: AssignOrder = {Floor:2, Type: Down}, ToId = 141
+fsm: New floor reached= 0
+fsm: Destination reached
+fsm: Door Opening in floor = 0
+elevMgr: floorDone case from fsm = 0
+que: RemoveOrdersOnFloor = 0
+que: RemoveOrder = {Floor:0, Type: Up}
+que: RemoveOrder = {Floor:0, Type: Down}
+que: RemoveOrder = {Floor:0, Type: Command}
+Remaining orders: 
+orderQue_t:
+	Floor: 0
+		 type: 0: has order = false,last Changed: = 2016-04-16 21:12:34.474970962 +0200 CEST
+		 type: 1: has order = false,last Changed: = 0001-01-01 00:00:00 +0000 UTC
+		 type: 2: has order = false,last Changed: = 2016-04-16 21:08:50.880137111 +0200 CEST
+	Floor: 1
+		 type: 0: has order = false,last Changed: = 2016-04-16 21:12:26.530549565 +0200 CEST
+		 type: 1: has order = false,last Changed: = 2016-04-16 21:09:35.311968053 +0200 CEST
+		 type: 2: has order = false,last Changed: = 2016-04-16 21:09:35.312092957 +0200 CEST
+	Floor: 2
+		 type: 0: has order = false,last Changed: = 2016-04-16 21:08:54.610290131 +0200 CEST
+		 type: 1: has order = true,last Changed: = 2016-04-16 21:12:33.996721215 +0200 CEST
+		 type: 2: has order = false,last Changed: = 2016-04-16 21:09:22.075641295 +0200 CEST
+	Floor: 3
+		 type: 0: has order = false,last Changed: = 0001-01-01 00:00:00 +0000 UTC
+		 type: 1: has order = false,last Changed: = 2016-04-16 21:09:23.784192258 +0200 CEST
+		 type: 2: has order = false,last Changed: = 2016-04-16 21:09:27.413278063 +0200 CEST
+
+transMgr: sending remove order (floor) on network = 0
+elevMgr: floorDone case done = 0
+transMgr: Received REMOVE_ORDER: {Source: 141, ElevatorId: 0, MessageId: REMOVE_ORDER, Button: {Floor:2, Type: Up}, Cost: 0}
+elevMgr: newMsg case from transMgr = {Source: 141, ElevatorId: 0, MessageId: REMOVE_ORDER, Button: {Floor:2, Type: Up}, Cost: 0}
+elevMgr: got REMOVE_ORDER from trans on floor 2, removing both
+que: RemoveOrder = {Floor:2, Type: Up}
+que: RemoveOrder = {Floor:2, Type: Down}
+fsm: Door closing, currentDestination = -1
+fsm: Going idle in floor =  0
+eventMgr: button {Floor:3, Type: Command} pressed! 
+elevMgr: newBtn case from eventmgr = {Floor:3, Type: Command}
+que: AddOrder = {Floor:3, Type: Command}
+transMgr: did not send new order ({Floor:3, Type: Command}) since ButtonType == CMD
+elevMgr: newBtn case done! = {Floor:3, Type: Command}
+elevMgr: Requesting order {Floor:3, Type: Command}
+transMgr: Request CMD Order on {Floor:3, Type: Command} with cost 3 and 2 elevs online, TAKE IT
+elevMgr: newMsg case from transMgr = {Source: 0, ElevatorId: 150, MessageId: DELEGATE_ORDER, Button: {Floor:3, Type: Command}, Cost: 0}
+elevMgr: got DELEGATE_ORDER from trans on order {Floor:3, Type: Command} to 150
+que: UnassignOrdersToId = 150
+que: AssignOrder = {Floor:3, Type: Command}, ToId = 150
+fsm: new destination = 3
+fsm: Starting to move in dir = 1 against destination = 3
+
+
+fsm: New floor reached= 1
+fsm: New floor reached= 2
+fsm: New floor reached= 3
+fsm: Destination reached
+fsm: Door Opening in floor = 3
+elevMgr: floorDone case from fsm = 3
+que: RemoveOrdersOnFloor = 3
+que: RemoveOrder = {Floor:3, Type: Up}
+que: RemoveOrder = {Floor:3, Type: Down}
+que: RemoveOrder = {Floor:3, Type: Command}
+Remaining orders: 
+orderQue_t:
+	Floor: 0
+		 type: 0: has order = false,last Changed: = 2016-04-16 21:12:34.474970962 +0200 CEST
+		 type: 1: has order = false,last Changed: = 0001-01-01 00:00:00 +0000 UTC
+		 type: 2: has order = false,last Changed: = 2016-04-16 21:08:50.880137111 +0200 CEST
+	Floor: 1
+		 type: 0: has order = false,last Changed: = 2016-04-16 21:12:26.530549565 +0200 CEST
+		 type: 1: has order = false,last Changed: = 2016-04-16 21:09:35.311968053 +0200 CEST
+		 type: 2: has order = false,last Changed: = 2016-04-16 21:09:35.312092957 +0200 CEST
+	Floor: 2
+		 type: 0: has order = false,last Changed: = 2016-04-16 21:08:54.610290131 +0200 CEST
+		 type: 1: has order = false,last Changed: = 2016-04-16 21:12:36.203862931 +0200 CEST
+		 type: 2: has order = false,last Changed: = 2016-04-16 21:09:22.075641295 +0200 CEST
+	Floor: 3
+		 type: 0: has order = false,last Changed: = 0001-01-01 00:00:00 +0000 UTC
+		 type: 1: has order = false,last Changed: = 2016-04-16 21:09:23.784192258 +0200 CEST
+		 type: 2: has order = false,last Changed: = 2016-04-16 21:12:47.125787774 +0200 CEST
+
+transMgr: sending remove order (floor) on network = 3
+elevMgr: floorDone case done = 3
+fsm: Door closing, currentDestination = -1
+fsm: Going idle in floor =  3
+eventMgr: button {Floor:0, Type: Up} pressed! 
+elevMgr: newBtn case from eventmgr = {Floor:0, Type: Up}
+que: AddOrder = {Floor:0, Type: Up}
+transMgr: sending new order on network = {Floor:0, Type: Up} to in total 2 elevs
+elevMgr: newBtn case done! = {Floor:0, Type: Up}
+elevMgr: Requesting order {Floor:0, Type: Up}
+transMgr: Request UP/DOWN Order on {Floor:0, Type: Up} with cost 3 and 2 elevs online
+transMgr: sending cost 3 on order {Floor:0, Type: Up} on network
+transMgr: New delegation sequence on order {Floor:0, Type: Up}, setting cost 3 to id 150
+transMgr: Received COST msg on order {Floor:0, Type: Up} from 141 with cost 2 
+transMgr: Setting cost on order {Floor:0, Type: Up}, with cost 2 to 141 in existing delegation sequence
+transMgr: Delegate order {Floor:0, Type: Up} to id 141
+transMgr: Received DELEGATE_ORDER msg ({Floor:0, Type: Up}) from 141 to 141
+tranMgr: allDelegatedEqual = true. delegated order {Floor:0, Type: Up} to elevator 141
+elevMgr: newMsg case from transMgr = {Source: 0, ElevatorId: 141, MessageId: DELEGATE_ORDER, Button: {Floor:0, Type: Up}, Cost: 0}
+elevMgr: got DELEGATE_ORDER from trans on order {Floor:0, Type: Up} to 141
+que: UnassignOrdersToId = 141
+que: AssignOrder = {Floor:0, Type: Up}, ToId = 141
+elevMgr: did not get delegation and got no destination, get new
+
+eventMgr: button {Floor:1, Type: Down} pressed! 
+elevMgr: newBtn case from eventmgr = {Floor:1, Type: Down}
+que: AddOrder = {Floor:1, Type: Down}
+transMgr: sending new order on network = {Floor:1, Type: Down} to in total 2 elevs
+elevMgr: newBtn case done! = {Floor:1, Type: Down}
+elevMgr: Requesting order {Floor:1, Type: Down}
+transMgr: Request UP/DOWN Order on {Floor:1, Type: Down} with cost 2 and 2 elevs online
+transMgr: sending cost 2 on order {Floor:1, Type: Down} on network
+transMgr: New delegation sequence on order {Floor:1, Type: Down}, setting cost 2 to id 150
+transMgr: Received COST msg on order {Floor:1, Type: Down} from 141 with cost 5 
+transMgr: Setting cost on order {Floor:1, Type: Down}, with cost 5 to 141 in existing delegation sequence
+transMgr: Delegate order {Floor:1, Type: Down} to id 150
+transMgr: Received DELEGATE_ORDER msg ({Floor:1, Type: Down}) from 141 to 150
+tranMgr: allDelegatedEqual = true. delegated order {Floor:1, Type: Down} to elevator 150
+elevMgr: newMsg case from transMgr = {Source: 0, ElevatorId: 150, MessageId: DELEGATE_ORDER, Button: {Floor:1, Type: Down}, Cost: 0}
+elevMgr: got DELEGATE_ORDER from trans on order {Floor:1, Type: Down} to 150
+que: UnassignOrdersToId = 150
+que: AssignOrder = {Floor:1, Type: Down}, ToId = 150
+fsm: new destination = 1
+fsm: Starting to move in dir = -1 against destination = 1
+
+
+eventMgr: button {Floor:1, Type: Up} pressed! 
+elevMgr: newBtn case from eventmgr = {Floor:1, Type: Up}
+que: AddOrder = {Floor:1, Type: Up}
+transMgr: sending new order on network = {Floor:1, Type: Up} to in total 2 elevs
+elevMgr: newBtn case done! = {Floor:1, Type: Up}
+eventMgr: button {Floor:2, Type: Down} pressed! 
+elevMgr: newBtn case from eventmgr = {Floor:2, Type: Down}
+que: AddOrder = {Floor:2, Type: Down}
+transMgr: sending new order on network = {Floor:2, Type: Down} to in total 2 elevs
+elevMgr: newBtn case done! = {Floor:2, Type: Down}
+elevMgr: Requesting order {Floor:2, Type: Down}
+transMgr: Request UP/DOWN Order on {Floor:2, Type: Down} with cost 5 and 2 elevs online
+transMgr: sending cost 5 on order {Floor:2, Type: Down} on network
+transMgr: New delegation sequence on order {Floor:2, Type: Down}, setting cost 5 to id 150
+transMgr: Received COST msg on order {Floor:2, Type: Down} from 141 with cost 255 
+transMgr: Setting cost on order {Floor:2, Type: Down}, with cost 255 to 141 in existing delegation sequence
+transMgr: Delegate order {Floor:2, Type: Down} to id 150
+transMgr: Received DELEGATE_ORDER msg ({Floor:2, Type: Down}) from 141 to 150
+tranMgr: allDelegatedEqual = true. delegated order {Floor:2, Type: Down} to elevator 150
+elevMgr: newMsg case from transMgr = {Source: 0, ElevatorId: 150, MessageId: DELEGATE_ORDER, Button: {Floor:2, Type: Down}, Cost: 0}
+elevMgr: got DELEGATE_ORDER from trans on order {Floor:2, Type: Down} to 150
+que: UnassignOrdersToId = 150
+que: Unassigned order: floor = 1, orderType = 1que: AssignOrder = {Floor:2, Type: Down}, ToId = 150
+fsm: new destination = 2
+transMgr: Received COST msg on order {Floor:1, Type: Down} from 141 with cost 5 
+transMgr: New delegation sequence on order {Floor:1, Type: Down}, setting cost 5 to id 141
+elevMgr: newMsg case from transMgr = {Source: 0, ElevatorId: 0, MessageId: COST, Button: {Floor:1, Type: Down}, Cost: 0}
+elevMgr: got COST from trans on order, i calculated cost = {1 1} 
+%!(EXTRA int=255)transMgr: sending cost 255 on order {Floor:1, Type: Down} on network
+transMgr: Setting cost on order {Floor:1, Type: Down}, with cost 255 to 150 in existing delegation sequence
+transMgr: Delegate order {Floor:1, Type: Down} to id 141
+transMgr: Received DELEGATE_ORDER msg ({Floor:1, Type: Down}) from 141 to 141
+tranMgr: allDelegatedEqual = true. delegated order {Floor:1, Type: Down} to elevator 141
+elevMgr: newMsg case from transMgr = {Source: 0, ElevatorId: 141, MessageId: DELEGATE_ORDER, Button: {Floor:1, Type: Down}, Cost: 0}
+elevMgr: got DELEGATE_ORDER from trans on order {Floor:1, Type: Down} to 141
+que: UnassignOrdersToId = 141
+que: Unassigned order: floor = 0, orderType = 0que: AssignOrder = {Floor:1, Type: Down}, ToId = 141
+eventMgr: button {Floor:2, Type: Up} pressed! 
+eventMgr: button {Floor:2, Type: Down} pressed! 
+elevMgr: newBtn case from eventmgr = {Floor:2, Type: Up}
+que: AddOrder = {Floor:2, Type: Up}
+transMgr: sending new order on network = {Floor:2, Type: Up} to in total 2 elevs
+elevMgr: newBtn case done! = {Floor:2, Type: Up}
+elevMgr: newBtn case from eventmgr = {Floor:2, Type: Down}
+elevMgr: newBtn case done! = {Floor:2, Type: Down}
+eventMgr: button {Floor:3, Type: Down} pressed! 
+elevMgr: newBtn case from eventmgr = {Floor:3, Type: Down}
+que: AddOrder = {Floor:3, Type: Down}
+transMgr: sending new order on network = {Floor:3, Type: Down} to in total 2 elevs
+elevMgr: newBtn case done! = {Floor:3, Type: Down}
+eventMgr: button {Floor:0, Type: Up} pressed! 
+elevMgr: newBtn case from eventmgr = {Floor:0, Type: Up}
+elevMgr: newBtn case done! = {Floor:0, Type: Up}
+eventMgr: button {Floor:0, Type: Command} pressed! 
+elevMgr: newBtn case from eventmgr = {Floor:0, Type: Command}
+que: AddOrder = {Floor:0, Type: Command}
+transMgr: did not send new order ({Floor:0, Type: Command}) since ButtonType == CMD
+elevMgr: newBtn case done! = {Floor:0, Type: Command}
+eventMgr: button {Floor:1, Type: Command} pressed! 
+elevMgr: newBtn case from eventmgr = {Floor:1, Type: Command}
+que: AddOrder = {Floor:1, Type: Command}
+transMgr: did not send new order ({Floor:1, Type: Command}) since ButtonType == CMD
+elevMgr: newBtn case done! = {Floor:1, Type: Command}
+eventMgr: button {Floor:2, Type: Command} pressed! 
+elevMgr: newBtn case from eventmgr = {Floor:2, Type: Command}
+que: AddOrder = {Floor:2, Type: Command}
+transMgr: did not send new order ({Floor:2, Type: Command}) since ButtonType == CMD
+elevMgr: newBtn case done! = {Floor:2, Type: Command}
+elevMgr: Requesting order {Floor:2, Type: Command}
+transMgr: Request CMD Order on {Floor:2, Type: Command} with cost 1 and 2 elevs online, TAKE IT
+elevMgr: newMsg case from transMgr = {Source: 0, ElevatorId: 150, MessageId: DELEGATE_ORDER, Button: {Floor:2, Type: Command}, Cost: 0}
+elevMgr: got DELEGATE_ORDER from trans on order {Floor:2, Type: Command} to 150
+que: UnassignOrdersToId = 150
+que: Unassigned order: floor = 2, orderType = 1que: AssignOrder = {Floor:2, Type: Command}, ToId = 150
+fsm: new destination = 2
+elevMgr: Requesting order {Floor:2, Type: Down}
+transMgr: Request UP/DOWN Order on {Floor:2, Type: Down} with cost 5 and 2 elevs online
+transMgr: sending cost 5 on order {Floor:2, Type: Down} on network
+transMgr: New delegation sequence on order {Floor:2, Type: Down}, setting cost 5 to id 150
+transMgr: Received COST msg on order {Floor:2, Type: Down} from 141 with cost 255 
+transMgr: Setting cost on order {Floor:2, Type: Down}, with cost 255 to 141 in existing delegation sequence
+transMgr: Delegate order {Floor:2, Type: Down} to id 150
+transMgr: Received DELEGATE_ORDER msg ({Floor:2, Type: Down}) from 141 to 150
+tranMgr: allDelegatedEqual = true. delegated order {Floor:2, Type: Down} to elevator 150
+elevMgr: newMsg case from transMgr = {Source: 0, ElevatorId: 150, MessageId: DELEGATE_ORDER, Button: {Floor:2, Type: Down}, Cost: 0}
+elevMgr: got DELEGATE_ORDER from trans on order {Floor:2, Type: Down} to 150
+que: UnassignOrdersToId = 150
+que: Unassigned order: floor = 2, orderType = 2que: AssignOrder = {Floor:2, Type: Down}, ToId = 150
+fsm: new destination = 2
+eventMgr: button {Floor:3, Type: Command} pressed! 
+elevMgr: newBtn case from eventmgr = {Floor:3, Type: Command}
+que: AddOrder = {Floor:3, Type: Command}
+transMgr: did not send new order ({Floor:3, Type: Command}) since ButtonType == CMD
+elevMgr: newBtn case done! = {Floor:3, Type: Command}
+elevMgr: Requesting order {Floor:2, Type: Command}
+transMgr: Request CMD Order on {Floor:2, Type: Command} with cost 1 and 2 elevs online, TAKE IT
+elevMgr: newMsg case from transMgr = {Source: 0, ElevatorId: 150, MessageId: DELEGATE_ORDER, Button: {Floor:2, Type: Command}, Cost: 0}
+elevMgr: got DELEGATE_ORDER from trans on order {Floor:2, Type: Command} to 150
+que: UnassignOrdersToId = 150
+que: Unassigned order: floor = 2, orderType = 1que: AssignOrder = {Floor:2, Type: Command}, ToId = 150
+fsm: new destination = 2
+transMgr: Received REMOVE_ORDER: {Source: 141, ElevatorId: 0, MessageId: REMOVE_ORDER, Button: {Floor:1, Type: Up}, Cost: 0}
+transMgr: Received COST msg on order {Floor:2, Type: Down} from 141 with cost 1 
+transMgr: New delegation sequence on order {Floor:2, Type: Down}, setting cost 1 to id 141
+elevMgr: newMsg case from transMgr = {Source: 141, ElevatorId: 0, MessageId: REMOVE_ORDER, Button: {Floor:1, Type: Up}, Cost: 0}
+elevMgr: got REMOVE_ORDER from trans on floor 1, removing both
+que: RemoveOrder = {Floor:1, Type: Up}
+que: RemoveOrder = {Floor:1, Type: Down}
+elevMgr: Requesting order {Floor:2, Type: Down}
+transMgr: Request UP/DOWN Order on {Floor:2, Type: Down} with cost 5 and 2 elevs online
+transMgr: sending cost 5 on order {Floor:2, Type: Down} on network
+transMgr: Setting cost on order {Floor:2, Type: Down}, with cost 5 to 150 in existing delegation sequence
+transMgr: Delegate order {Floor:2, Type: Down} to id 141
+elevMgr: newMsg case from transMgr = {Source: 0, ElevatorId: 0, MessageId: COST, Button: {Floor:2, Type: Down}, Cost: 0}
+elevMgr: got COST from trans on order, i calculated cost = {2 1} 
+%!(EXTRA int=5)transMgr: sending cost 5 on order {Floor:2, Type: Down} on network
+transMgr: ERROR! got multiple cost on order {Floor:2, Type: Down} from 150. oldCostAndToId = {5 141}, newCost got = 5
+elevMgr: Requesting order {Floor:2, Type: Down}
+transMgr: Request UP/DOWN Order on {Floor:2, Type: Down} with cost 5 and 2 elevs online
+transMgr: sending cost 5 on order {Floor:2, Type: Down} on network
+transMgr: ERROR! got multiple cost on order {Floor:2, Type: Down} from 150. oldCostAndToId = {5 141}, newCost got = 5
+transMgr: Received DELEGATE_ORDER msg ({Floor:2, Type: Down}) from 141 to 141
+tranMgr: allDelegatedEqual = true. delegated order {Floor:2, Type: Down} to elevator 141
+elevMgr: newMsg case from transMgr = {Source: 0, ElevatorId: 141, MessageId: DELEGATE_ORDER, Button: {Floor:2, Type: Down}, Cost: 0}
+elevMgr: got DELEGATE_ORDER from trans on order {Floor:2, Type: Down} to 141
+que: UnassignOrdersToId = 141
+que: AssignOrder = {Floor:2, Type: Down}, ToId = 141
+transMgr: Received COST msg on order {Floor:2, Type: Down} from 141 with cost 255 
+transMgr: New delegation sequence on order {Floor:2, Type: Down}, setting cost 255 to id 141
+transMgr: Received DELEGATE_ORDER msg ({Floor:2, Type: Down}) from 141 to 150
+trasnMgr: ERROR! allDelegatedEqual = false, delegation[{Floor:2, Type: Down}] = map[141:{cost:255 toId:150}]
+elevMgr: newMsg case from transMgr = {Source: 0, ElevatorId: 0, MessageId: COST, Button: {Floor:2, Type: Down}, Cost: 0}
+elevMgr: got COST from trans on order, i calculated cost = {2 1} 
+%!(EXTRA int=5)transMgr: sending cost 5 on order {Floor:2, Type: Down} on network
+fsm: New floor reached= 2
+fsm: Destination reached
+fsm: Door Opening in floor = 2
+===Lost Heartbeat ID: 150, now have 1 elevs===
+===transMgr: Lost my own heartbeat, all alone in the world
+===Lost Heartbeat ID: 141, now have 0 elevs===
+eventMgr: button {Floor:1, Type: Down} pressed! 
+eventMgr: button {Floor:1, Type: Up} pressed! 
+fsm: Door closing, currentDestination = -1
+fsm: Going idle in floor =  2
+eventMgr: button {Floor:1, Type: Up} pressed! 
+eventMgr: button {Floor:1, Type: Up} pressed! 
+eventMgr: button {Floor:1, Type: Up} pressed! 
+eventMgr: button {Floor:1, Type: Up} pressed! 
+eventMgr: button {Floor:1, Type: Up} pressed! 
+eventMgr: button {Floor:1, Type: Up} pressed! 
+eventMgr: button {Floor:1, Type: Up} pressed! 
+eventMgr: button {Floor:1, Type: Up} pressed! 
+eventMgr: button {Floor:1, Type: Up} pressed! 

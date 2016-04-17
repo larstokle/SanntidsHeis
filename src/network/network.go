@@ -24,7 +24,7 @@ func MakeSender(addr string) (chan<- Message_t) {
 
 		defer conn.Close()
 		for newMsg := range msg {
-			//fmt.Printf("Sender sending %+v \n", newMsg)
+			//fmt.Printf("Sender sending %+v \n", newMsg))
 			json_msg, err := json.Marshal(newMsg)
 			checkAndPrintError(err, "ERROR! Marshal")
 			_, err = conn.Write(json_msg)
@@ -45,14 +45,14 @@ func MakeReceiver(port string) (chan Message_t) {
 		localAddr, err := net.ResolveUDPAddr("udp", port)
 		checkAndPrintError(err, "Resolve UDP error")
 
-		conn, err := net.ListenUDP("udp", localAddr)
+		conn, err := net.ListenUDP("udp", localAddr)//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<FÅR PANIC OM DEN ALLEREDE ER BRUKT
 		if err != nil {
 			fmt.Printf("ERROR: ListenUDP error: %s\n",err)
 		}
 		defer conn.Close()
 
 		for {
-			buf := make([]byte, 1024)
+			buf := make([]byte, 2048)
 			conn.SetReadDeadline(time.Now().Add(time.Millisecond * 2000))
 			n, _, err := conn.ReadFromUDP(buf)
 			if !checkAndPrintError(err, "ERROR! ReadFromUDP:"){
@@ -63,14 +63,14 @@ func MakeReceiver(port string) (chan Message_t) {
 				//fmt.Printf("Reciever recieved: %+v \n",recived)
 				select{
 				case <-msg:
-					fmt.Printf("Reciever: Received on send channel, or send channel closed. function returning\n")
+					fmt.Printf("Reciever: Received on send channel. function returning\n")
 					return
 				case msg <- recived:
 				}
 			}
 			select{
 			case <- msg:
-				fmt.Printf("Reciever: Received on send channel, or channel closed. function returning\n")
+				fmt.Printf("Reciever: Received on send channel. function returning\n")
 				return
 			default:
 				continue
@@ -129,7 +129,7 @@ func GetLastIPByte() int{
 	}
 	
 	lastByte := addr[dot:backslash]
-	num,err := strconv.Atoi(lastByte)//krasjer uten nett!!!!
+	num,err := strconv.Atoi(lastByte)
 	
 	if !checkAndPrintError(err, "strconv error in GetLastIPByte") {
 		return num

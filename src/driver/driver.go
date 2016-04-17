@@ -9,8 +9,21 @@ package driver
 import "C"
 import (
 	. "globals"
-	"time"
+	"fmt"
 )
+
+func init(){
+	if int(C.io_init(ET_comedi)) != 1{
+		fmt.Printf("ERROR! driver: init failed")
+	}
+	RunStop()
+
+	for i := 0; i < N_FLOORS; i++{
+		for j:= 0; j < N_BUTTON_TYPES; j++{
+			SetButtonLight(j,i,false)
+		}
+	}
+}
 
 func ReadButton(button int, floor int) bool {
 	if floor < 0 || floor >= N_FLOORS || button < 0 || button > N_BUTTON_TYPES {
@@ -51,46 +64,7 @@ func encodeLight(button int, floor int) int {
 	return channel
 }
 
-func Init() int {
-	returnVal := int(C.io_init(ET_comedi))
-	RunStop()
 
-	for i := 0; i < N_FLOORS; i++{
-		for j:= 0; j < N_BUTTON_TYPES; j++{
-			SetButtonLight(j,i,false)
-		}
-	}
-	
-	return returnVal
-}
-
-func RunTopFloor() {
-	if GetFloorSignal() != 3 {
-		C.io_clear_bit(C.MOTORDIR)
-		//time.Sleep(time.Second * 1)
-		C.io_write_analog(C.MOTOR, 2800)
-		for C.io_read_bit(C.SENSOR_FLOOR4) == 0 {
-			SetFloorIndicator(GetFloorSignal())
-			time.Sleep(time.Millisecond * 200)
-		}
-		SetFloorIndicator(GetFloorSignal())
-		C.io_write_analog(C.MOTOR, 0)
-	}
-}
-
-func RunBottomFloor() {
-	if GetFloorSignal() != 0 {
-		C.io_set_bit(C.MOTORDIR)
-		//time.Sleep(time.Second * 1)
-		C.io_write_analog(C.MOTOR, 2800)
-		for C.io_read_bit(C.SENSOR_FLOOR1) == 0 {
-			SetFloorIndicator(GetFloorSignal())
-			time.Sleep(time.Millisecond * 200)
-		}
-		SetFloorIndicator(GetFloorSignal())
-		C.io_write_analog(C.MOTOR, 0)
-	}
-}
 
 func RunUp() {
 	C.io_clear_bit(C.MOTORDIR)
