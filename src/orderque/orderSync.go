@@ -1,15 +1,15 @@
 package orderque
 
-import(
-	."globals"
-	"encoding/json"
-	"os"
+import (
 	"driver"
+	"encoding/json"
 	"fmt"
+	. "globals"
+	"os"
 	"time"
 )
 
-func (thisQue *orderQue_t) SyncExternal(queToSync orderQue_t) { //add error returns?
+func (thisQue *orderQue_t) SyncExternal(queToSync orderQue_t) {
 	externalButtons := []int{UP, DOWN}
 	for floor := FIRST_FLOOR; floor < N_FLOORS; floor++ {
 		for _, orderType := range externalButtons {
@@ -21,7 +21,7 @@ func (thisQue *orderQue_t) SyncExternal(queToSync orderQue_t) { //add error retu
 	}
 }
 
-func (thisQue *orderQue_t) SyncInternal(queToSync orderQue_t) { //add error returns?
+func (thisQue *orderQue_t) SyncInternal(queToSync orderQue_t) {
 	for floor := FIRST_FLOOR; floor < N_FLOORS; floor++ {
 		if queToSync[floor][CMD].lastChangeTime.After(thisQue[floor][CMD].lastChangeTime) {
 			thisQue[floor][CMD] = queToSync[floor][CMD]
@@ -30,8 +30,7 @@ func (thisQue *orderQue_t) SyncInternal(queToSync orderQue_t) { //add error retu
 	}
 }
 
-
-func (que *orderQue_t) WriteToLog(){
+func (que *orderQue_t) WriteToLog() {
 	f, err := os.Create(QUE_LOG_FILE)
 	check(err)
 	defer f.Close()
@@ -39,11 +38,11 @@ func (que *orderQue_t) WriteToLog(){
 	check(err)
 }
 
-func ReadFromLog() orderQue_t{
+func ReadFromLog() orderQue_t {
 	que := New()
 	f, err := os.Open(QUE_LOG_FILE)
 	defer f.Close()
-	if(os.IsNotExist(err)){
+	if os.IsNotExist(err) {
 		return que
 	}
 
@@ -54,40 +53,39 @@ func ReadFromLog() orderQue_t{
 }
 
 func check(e error) {
-    if e != nil {
-        fmt.Printf("ERROR! que logger: ",e)
-    }
+	if e != nil {
+		fmt.Printf("ERROR! que logger: ", e)
+	}
 }
 
-func Encode(que orderQue_t) ([]byte, error){
+func Encode(que orderQue_t) ([]byte, error) {
 	return json.Marshal(que)
 }
 
-func Decode(data []byte) (orderQue_t, error){
+func Decode(data []byte) (orderQue_t, error) {
 	var que orderQue_t
 	err := json.Unmarshal(data, &que)
 	return que, err
 }
 
-
-func (order order_t) MarshalJSON() ([]byte, error){
+func (order order_t) MarshalJSON() ([]byte, error) {
 	return json.Marshal(&struct {
-		HasOrder       bool		`json:"hasOrder"`
+		HasOrder       bool      `json:"hasOrder"`
 		LastChangeTime time.Time `json:"lastChangeTime"`
-		AssignedToID int 	`json:"assignedToID"`
-		}{
-			HasOrder: order.hasOrder,
-			LastChangeTime: order.lastChangeTime,
-			AssignedToID: order.assignedToID,
-		})
+		AssignedToID   int       `json:"assignedToID"`
+	}{
+		HasOrder:       order.hasOrder,
+		LastChangeTime: order.lastChangeTime,
+		AssignedToID:   order.assignedToID,
+	})
 }
 
 func (order *order_t) UnmarshalJSON(data []byte) error {
 	temp := struct {
-		HasOrder       bool		`json:"hasOrder"`
+		HasOrder       bool      `json:"hasOrder"`
 		LastChangeTime time.Time `json:"lastChangeTime"`
-		AssignedToID int 	`json:"assignedToID"`
-		}{}
+		AssignedToID   int       `json:"assignedToID"`
+	}{}
 	err := json.Unmarshal(data, &temp)
 
 	*order = order_t{hasOrder: temp.HasOrder, lastChangeTime: temp.LastChangeTime, assignedToID: temp.AssignedToID}
