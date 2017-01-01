@@ -1,4 +1,4 @@
 #!/bin/bash
 clear
-echo "Aviable servers:"
+echo "Available servers:"
 sudo arp-scan -l 
